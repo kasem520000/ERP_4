@@ -1,5 +1,4 @@
 {
-  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
@@ -288,6 +287,42 @@
       "when": 1794200000000,
       "tag": "0041_consolidation",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1794150000000,
+      "tag": "0042_budgeting",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1794236400000,
+      "tag": "0043_payroll",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1794320000000,
+      "tag": "0044_industry_wholesale_electronics",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1794400000000,
+      "tag": "0045_healthcare_claim_ref",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1794480000000,
+      "tag": "0046_industry_healthcare",
+      "breakpoints": true
     }
-  ]
+  ],
+  "version": "7"
 }

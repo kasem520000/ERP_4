@@ -9,7 +9,9 @@ import { validateRegistry, registrySnapshot, REPORT_CONTRACTS } from "../../repo
  * in the PHASE-033 completion report; THIS file imports only the registry,
  * so the four new contracts' boot validation runs everywhere):
  *
- * - the 80-contract registry (76 + the four §10 consolidation rows)
+ * - the 85-contract registry (76 base + the two PHASE-028 budgeting
+ *   rows + the three PHASE-029 payroll rows from the restored lineage +
+ *   the four §10 consolidation rows — the restoration merge's union)
  *   validates against the known-permission catalog (a malformed contract
  *   fails startup — REPORT_CONTRACT §2);
  * - the consolidation ids/permissions are exactly the REPORT_CATALOG §10
@@ -79,6 +81,10 @@ const KNOWN_PERMISSIONS: ReadonlySet<string> = new Set([
   "fixed_assets.reports.view",
   "notes.notes.view",
   "installments.plans.view",
+  // PHASE-028/029 (restored lineage, migrations 0042/0043 seeds): the
+  // budgeting + payroll report keys ride their own .reports.view grants.
+  "budgeting.reports.view",
+  "payroll.reports.view",
   // PHASE-034 (0041 seed): the consolidation keys (§3.15)
   "consolidation.reports.view",
   "consolidation.eliminations.create",
@@ -92,15 +98,15 @@ const CONSOLIDATION_IDS = [
 ] as const;
 
 describe("PHASE-034 · the consolidation report contracts (REPORT_CATALOG §10)", () => {
-  it("the 80-contract registry validates against the known-permission catalog", () => {
+  it("the 85-contract registry validates against the known-permission catalog", () => {
     const result = validateRegistry([...REPORT_CONTRACTS], { knownPermissions: KNOWN_PERMISSIONS });
     expect(result.errors).toEqual([]);
-    expect(result.count).toBe(80);
+    expect(result.count).toBe(85);
   });
 
   it("the four §10 keys are registered verbatim with consolidation.reports.view", () => {
     const snapshot = registrySnapshot(REPORT_CONTRACTS);
-    expect(snapshot).toHaveLength(80);
+    expect(snapshot).toHaveLength(85);
     for (const id of CONSOLIDATION_IDS) {
       const row = snapshot.find((entry) => entry.id === id);
       expect(row, `${id} must be registered`).toBeDefined();

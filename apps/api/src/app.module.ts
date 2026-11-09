@@ -29,6 +29,9 @@ import { PurchasingModule } from "./modules/purchasing/purchasing.module";
 import { FixedAssetsModule } from "./modules/fixed_assets/fixed_assets.module";
 import { NotesModule } from "./modules/notes/notes.module";
 import { InstallmentsModule } from "./modules/installments/installments.module";
+// PHASE-028/029 (restored lineage): the budgeting + payroll modules.
+import { BudgetingModule } from "./modules/budgeting/budgeting.module";
+import { PayrollModule } from "./modules/payroll/payroll.module";
 // PHASE-034: the consolidation module (ADR-0018 / DR-006 option A — the
 // final roadmap phase, stage 11 / the Enterprise Depth gate).
 import { ConsolidationModule } from "./modules/consolidation/consolidation.module";
@@ -71,6 +74,8 @@ import { UsageLimitGuard } from "./infra/auth/usage-limit.guard";
     FixedAssetsModule,
     NotesModule,
     InstallmentsModule,
+    BudgetingModule,
+    PayrollModule,
     ConsolidationModule,
     SalesModule,
     DistributionModule,

@@ -64,6 +64,14 @@ ED-01…ED-19) was applied on top of the v1.1 baseline and re-validated:
   ADR set 0001..0018, six new structural checks 4d–4i for expansion artifacts) and exits 0:
   **29/29 checks passed** over **240 markdown documents** (the v1.1 snapshot of
   202 total markdown files recorded above remains the historical baseline statement).
+- **THE RESTORATION MERGE (2026-11-09):** the lost stage-9/10 lineage (PHASE-028–031) was
+  restored from the uploaded `ERP_PLATFORM_PHASE031.zip` and merged onto the PHASE-034 head —
+  the final consolidation uniting PHASE-001…034 in one build (see
+  [../implementation/phases/reports/PHASE-034-FINAL-RESTORATION.md](../implementation/phases/reports/PHASE-034-FINAL-RESTORATION.md)).
+  The merged `docs/` corpus now counts **316 markdown files** (the restored lineage's
+  completion reports, industry templates, and planning docs united with the surviving
+  lineage's); the historical baseline statements above stay as recorded snapshots of their
+  own validation runs.
 - v2.0 additions: 9 phase documents (PHASE-026…034, stages 9–11) all carry the 8 canonical
   headings; 6 modules / 38 feature keys (catalog 125 → **163 keys, 16 → 22 modules**);
   23 new catalog entities; 22 new enums; 16 CoA purposes; goldens G-21…G-32; invariants

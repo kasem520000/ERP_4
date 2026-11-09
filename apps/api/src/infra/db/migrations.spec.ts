@@ -44,9 +44,9 @@ describe("migration manifest (MIGRATION_STRATEGY §1)", () => {
     // CoA purposes + the RC-11 'NOTES' kind + the notification categories).
     // PHASE-032: 0039_education_template (the education commercial shell
     // per ED-08 — configuration only: the industry_templates registry seed
-    // for industry.education v1.0.0, no schema objects; executes on the
-    // PHASE-027 lineage per the stage-10 independence while the lost
-    // interim 028–031 states remain NOT_STARTED).
+    // for industry.education v1.0.0, no schema objects; shipped on the
+    // PHASE-027 lineage while the pre-reset interim 028–031 states were
+    // still lost — now RESTORED below as 0042–0046).
     // PHASE-033: 0040_agriculture_template (the agriculture commercial
     // shell per ED-09 — configuration only: the industry_templates registry
     // seed for industry.agriculture v1.0.0, no schema objects; the §J
@@ -59,7 +59,35 @@ describe("migration manifest (MIGRATION_STRATEGY §1)", () => {
     // the CONSOLIDATION_ADJUSTMENT CoA template account + the 5 §3.15
     // permission seeds + the 5 feature-key plan grants; the FINAL roadmap
     // phase — stage 11, the Enterprise Depth gate).
-    expect(files.at(-1)?.tag).toBe("0041_consolidation");
+    // ── RESTORED LINEAGE (phases 028–031 recovered from the pre-reset
+    // ERP_PLATFORM_PHASE031.zip and merged post-034; migrations renumbered
+    // 0039→0042, 0040→0043, 0041→0044, 0042→0045, 0043→0046 — content
+    // byte-faithful, application order after the live 0039–0041 set). ──
+    // PHASE-028: 0042_budgeting (the budgeting module per DR-004/ED-04 —
+    // budgets + budget_lines with the BR-050 partial unique + the
+    // notifications 'budgeting' category + the six feature-key plan grants;
+    // NOT ledger documents — zero journal rules by construction).
+    // PHASE-029: 0043_payroll (the payroll module per DR-005/ED-05 —
+    // employees/salary_structures/salary_components/payroll_runs/run_lines 🔒/
+    // employee_loans/loan_lines with the INV-025 row-level totals law + the
+    // six CoA purposes (2170/2180/2190/5270/5280/5295) + the cash_movements
+    // source widening (additive) + the notifications 'payroll' category +
+    // the eight feature-key plan grants; §3.14 permissions pre-seeded in
+    // 0004/0005).
+    // PHASE-030: 0044_industry_wholesale_electronics (the first two Blueprint
+    // v2.0 stage-10 industry templates per ED-06 — DATA-ONLY registry seeds:
+    // industry.wholesale + industry.electronics at v1.0.0 with the report
+    // pins reconciled to the live ar.aging / inventory.valuation keys; zero
+    // new schema objects, permissions, or grants — INV-022).
+    // PHASE-031: 0045_healthcare_claim_ref (the Healthcare Commercial Shell's
+    // single schema change per ED-07 — the additive nullable claim_ref
+    // varchar(64) + the partial (tenant_id, claim_ref) grouping index;
+    // external reference semantics only, never a document number) +
+    // 0046_industry_healthcare (the industry.healthcare v1.0.0 DATA-ONLY
+    // registry seed with the partners.ar_aging → ar.aging pin reconciliation;
+    // the six typed workflow-policy keys register in the code-owned
+    // POLICY_REGISTRY — zero new schema objects, permissions, or grants).
+    expect(files.at(-1)?.tag).toBe("0046_industry_healthcare");
   });
 
   it("journal entries mirror the manifest order (drizzle-kit manifest)", () => {
@@ -72,10 +100,7 @@ describe("migration manifest (MIGRATION_STRATEGY §1)", () => {
   it("every migration upserts its own schema-state number (readiness mirror)", () => {
     readMigrationFiles().forEach((file, index) => {
       const number = String(index + 1);
-      expect(
-        file.content,
-        `${file.tag} must upsert ('schema_version', ${number})`,
-      ).toMatch(
+      expect(file.content, `${file.tag} must upsert ('schema_version', ${number})`).toMatch(
         new RegExp(
           `INSERT INTO erp\\._schema_state \\(key, value\\) VALUES \\('schema_version', ${number}\\)`,
         ),
