@@ -198,6 +198,25 @@ export const MIGRATIONS: readonly string[] = [
   // register in the code-owned POLICY_REGISTRY — zero new tables/columns/
   // enums/journals/permissions/plan-grants, INV-022).
   "0046_industry_healthcare",
+  // PHASE-035: 0047_industry_rental_logistics.sql (the THIRTEENTH template's
+  // registry seed — the CAPABILITY_MATRIX §3 pending-intake set completed:
+  // the 0027-convention plan grant wave puts crm.rental_contracts /
+  // crm.contract_deposits / crm.late_fees / distribution.shipment_tracking on
+  // business + enterprise, and the industry.rental_logistics v1.0.0 manifest
+  // seeds with the §J reconciliations — treasury.cash_accounts →
+  // treasury.accounts, partners.ar_aging → ar.aging, pins on the live
+  // services.contract_revenue_schedule / ar.aging / inventory.valuation keys;
+  // the seven typed workflow-policy keys register in the code-owned
+  // POLICY_REGISTRY — configuration-only, INV-022).
+  "0047_industry_rental_logistics",
+  // PHASE-035: 0048_platform_overview.sql (the platform control-panel
+  // dashboard's sanctioned cross-tenant aggregate: ONE STABLE jsonb
+  // SECURITY DEFINER read — erp.platform_console_overview() — over the
+  // tenant-RLS'd subscription/device/e-invoicing slices, the
+  // subscriptions_needing_attention() precedent; grouped counts only, no
+  // tenant-identifying rows cross the boundary; revoked from PUBLIC, granted
+  // to erp_app).
+  "0048_platform_overview",
 ];
 
 /**

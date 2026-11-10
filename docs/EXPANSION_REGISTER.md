@@ -172,3 +172,21 @@ Every new template doc follows the existing format (embedded ```json manifest = 
 5. MVP gate (PHASE-014) and GA gate (PHASE-025) acceptance criteria are unchanged — stages 9–11 are additive releases.
 6. Every updated document keeps the repository's cross-reference discipline: feature keys cite [FEATURE_CATALOG.md](product/FEATURE_CATALOG.md), goldens cite [JOURNAL_RULES.md](accounting/JOURNAL_RULES.md) §7, permissions cite [AUTHORIZATION_MATRIX.md](security/AUTHORIZATION_MATRIX.md), phases cite their phase documents. All relative links must resolve (validator check 1a).
 7. Documentation stays honest: no fabricated country rates, no PLACEHOLDER removal, no claims of implementation — new phases are `PLANNED` until executed with evidence.
+
+## P. Successor program — the post-roadmap expansion v3.0 (pointer)
+
+This register closed the v2.0 breadth/depth expansion (stages 9–11, PHASE-026…034) and
+the PHASE-035 gap-closure followed it. On 2026-11-10 the owner registered the successor
+program — the **Comprehensive-ERP expansion v3.0**, derived from a second independent
+external review (495 numbered gaps) and reconciled against the shipped tree (PHASE-035
+exclusions applied, already-exists corrections frozen, 14 owner additions included):
+
+→ **[planning/POST_ROADMAP_EXPANSION_REGISTER.md](planning/POST_ROADMAP_EXPANSION_REGISTER.md)**
+
+It plans **PHASE-036…PHASE-058** (23 phases, five execution waves W1–W5, priorities
+P1–P4, one phase per delivery archive) toward "ERP شامل متكامل بكل ما تعني الكلمة".
+All §A–§O disciplines of THIS register carry over verbatim to the successor program
+(§3 "Register integrity rules" there restates them); the validator upgrade for v3.0 is
+recorded in its §3.6 (phase range 001–058; 58 phase documents; headings sweep 026–058).
+Nothing in this v2.0 register is modified by that program — it is the frozen baseline
+the successor builds additively upon.

@@ -1,47 +1,71 @@
 # Next Action
 
-> **Status:** LIVING DOCUMENT — updated at every phase completion · **Updated:** 2026-11-06
+> **Status:** LIVING DOCUMENT — updated at every phase completion · **Updated:** 2026-11-10 (expansion v3.0 registered)
 
 ## The single next action
 
-**The 25-phase blueprint is CLOSED — the platform is GA** (PHASE-025 COMPLETE
-2026-11-06; release `v1.1.0` / CalVer `v1.26.11.0`, tags real in this repository;
-evidence: [../implementation/phases/reports/PHASE-025-COMPLETION.md](../implementation/phases/reports/PHASE-025-COMPLETION.md)
-+ the closed [GA-RELEASE-CHECKLIST.md](../implementation/phases/reports/GA-RELEASE-CHECKLIST.md)).
+**PHASE-035 is COMPLETE (2026-11-10) — the 34-phase roadmap is finished AND the
+first post-roadmap gap-closure phase is shipped** (evidence:
+[../implementation/phases/reports/PHASE-035-COMPLETION.md](../implementation/phases/reports/PHASE-035-COMPLETION.md):
+the public marketing landing page `/{locale}/welcome` · the platform control-panel
+dashboard `/{locale}/platform/overview` · the THIRTEENTH industry template
+`industry.rental_logistics` · the a4-payslip print template — the four gaps the
+user's review of `ERP_PLATFORM_PHASE034.zip` found, closed; CURRENT_SHIPPED_PHASE
+034 → 035; migrations 0001–0048).
 
-Post-GA work is governed by two tracks (no vague aspirations — every item has a home):
+**NEXT ELIGIBLE: PHASE-036 — Extensibility Foundation: Custom Fields &
+Productivity (أساس المرونة: الحقول المخصصة والإنتاجية), on the owner's explicit
+execution order.** The post-roadmap expansion v3.0 program is now REGISTERED
+(2026-11-10): a second external review (three uploaded reports — conformance
+audit + maturity verdict + the 495-gap capability analysis) was reconciled
+against the shipped tree and became the binding plan
+[../planning/POST_ROADMAP_EXPANSION_REGISTER.md](../planning/POST_ROADMAP_EXPANSION_REGISTER.md)
+— **23 planned phases PHASE-036…PHASE-058** toward a comprehensive ERP
+("متكامل بكل ما تعني الكلمة"), each with its canonical 8-section phase
+document under `docs/implementation/phases/` (status: PLANNED — NOT STARTED;
+PHASE-058 AI is PROPOSED/decision-gated). **Delivery discipline: the owner says
+"begin PHASE-03NN" (this conversation or a fresh one with the
+`ERP_PLATFORM_PHASE035.zip` archive attached) → the phase executes end-to-end
+(migration + contracts + api suite + web screens + docs + completion report) →
+delivery = `ERP_PLATFORM_PHASE03NN.zip`.** The register's W1 wave order is
+036 → 037 → 038 → 039 (foundation), then W2–W5 per its §1.1 table.
 
-1. **The expansion releases (stages 9–11 — PHASE-026…034)** per
-   [../EXPANSION_REGISTER.md](../EXPANSION_REGISTER.md) +
-   [../planning/RELEASE_STRATEGY.md](../planning/RELEASE_STRATEGY.md) — additive
-   post-GA releases that never alter the MVP/GA gate criteria (ED-01). **Next
-   eligible phase: PHASE-026 — Fixed Assets & Depreciation** (asset register &
-   categories, monthly depreciation runs, revaluation, disposal with gain/loss
-   mirrors — INV-023, goldens G-21…G-23; prerequisites 025 ✓ + 007 ✓ + 013 ✓ per
-   the dependency graph).
-2. **The decision-record queue** (the PHASE-025 T14 stubs + the standing records):
-   DR-P25-01 bug bounty · DR-P25-02 support SLA (OQ-008) · DR-P25-03 personal
-   payments (OQ-007) · DR-P25-04 ETA/UAE adapter follow-ups · DR-P25-05 iOS ·
-   DR-P25-06 the observability exporter swap (SF-024-021 → the live in-process
-   substrate's pipeline leg) · DR-P25-07 the report-run quota — plus the standing
-   open records GA shipped with: DR-001 (ZATCA option C — the launch segment
-   excludes e-invoicing-requiring taxpayers; certification path per the
-   verification gate), DR-002 (payment production cutover), DR-003 (Egypt ETA),
-   DR-024-02 (OQ-009 legal review — BLOCKED-EXTERNAL, 90-day working assumption).
+**The standing external/infra-gated ledger (unchanged; a documented INCOMPLETE
+beats a fabricated pass — directive §1.10–1.11):**
 
-Why now: GA shipped with the honest ledger — the internal evidence legs are ALL
-GREEN (143 files/2035 tests; the 10× local load harness T-01…T-08 within every
-budget; both restore drills PASSED with timings; SLOs/error budgets live with the
-seeded-burn proof; the observability audit green; docs-drift battery green), and
-the hosted legs carry the standing owner-directive waiver pattern with named
-follow-up obligations: **the production-class hosted k6 full-load + the 12 h
-staging soak + the recovery-region wall time** (PERFORMANCE_TEST_PLAN §8 —
-passing on weaker hardware does not close the hosted gate; re-run before any
-production-scale claim is re-quoted), **the external pen-test firm leg** (the
-PHASE-024 waiver re-read at the GA checklist), and **the November backup
-attestation honestly NOT SIGNED** (first due 2026-12-01 — the first full month
-post-GA; the nightly smoke exists as an executable procedure, not 30 calendar
-days of scheduled runs).
+1. **The standing hosted-infra legs** (the owner-directive waiver pattern, with
+   named follow-up obligations): the production-class hosted k6 full-load + the
+   12 h staging soak + the recovery-region wall time
+   ([../testing/PERFORMANCE_TEST_PLAN.md](../testing/PERFORMANCE_TEST_PLAN.md) §8
+   — passing on weaker hardware does not close the hosted gate), the external
+   pen-test firm leg (the PHASE-024 waiver), and the November backup
+   attestation honestly NOT SIGNED (first due 2026-12-01), plus the hosted-CI /
+   compose / Testcontainers runs waived since PHASE-001.
+2. **ZATCA verification** — the adapter stays the honestly UNVERIFIED
+   refuse-to-submit stub ([DR-001](../decisions/compliance/DR-001-zatca-scope-and-timing.md)
+   OPEN, option C: the launch segment excludes e-invoicing-requiring taxpayers;
+   GATE-1…GATE-4 unmet and named in every refusal — no external access, nothing
+   fabricated).
+3. **Egypt ETA** — NOT_STARTED pending the approving decision record
+   ([DR-003](../decisions/compliance/DR-003-egypt-eta-scope.md) stays the
+   DEFERRED draft; the fake-eta evaluation harness proves the port only).
+4. **The payment production cutover** — INCOMPLETE with
+   [DR-002](../decisions/product/DR-002-payment-provider-selection.md) OPEN (the
+   sandbox is hardened; no production cutover claim).
+5. **The standing decision-record queue** — DR-P25-01 bug bounty · DR-P25-02
+   support SLA (OQ-008) · DR-P25-03 personal payments (OQ-007) · DR-P25-04
+   ETA/UAE adapter follow-ups · DR-P25-05 iOS · DR-P25-06 the observability
+   exporter swap · DR-P25-07 the report-run quota · DR-024-02 legal review
+   (BLOCKED-EXTERNAL, the 90-day working assumption).
+
+Why now: the gap-closure review closed the product's own last four self-found
+gaps — the marketing landing, the platform dashboard screen, the thirteenth
+template, and the payslip print — with all in-sandbox evidence green (contracts
+56/56; apps/api 42 files / 479 tests ALL PASS; validate-manifests 13/13;
+template-prerequisites 37/37; golden-effective-configs 44/44;
+capability-matrix-reconciliation 6/6; i18n parity ar=en=4,286; the `__db__`
+suites on the live harness exactly as before). Everything that remains open is
+external or infrastructure — the honest ledger above is the entire list.
 
 How (the standing operating rules, now the product's operating system):
 
@@ -51,11 +75,12 @@ How (the standing operating rules, now the product's operating system):
    (rotation drills), chaos §9, compliance matrix §6 (official-source
    monitoring), backup runbook §8 (quarterly cold drills + monthly
    attestations), DR §7 (readiness inventory quarterly).
-2. Every new phase intake follows the handoff protocol: read the completion
+2. Any future phase intake follows the handoff protocol: read the completion
    report + the consumed-as-is specs first; register intake keys per
    FEATURE_CATALOG §25 BEFORE code (catalog drift: migrations manifest +
    ENTITY_CATALOG + AUTHORIZATION_MATRIX + schema.ts mirror + runtime
-   FEATURE_DEPS + check-rls + attack-suite fixtures for every new table).
+   FEATURE_DEPS + check-rls + attack-suite fixtures for every new table) —
+   the PHASE-035 rental intake is the worked example.
 3. Do not mark a hosted leg green without its hosted evidence (the honest-marker
    discipline: a documented INCOMPLETE beats a fabricated pass — directive
    §1.10–1.11).

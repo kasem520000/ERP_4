@@ -1,11 +1,15 @@
 # Template: Rental & Logistics — `rental_logistics`
 
-> **Status:** STABLE · **Owner:** Industry Solutions Architecture · **Updated:** 2026-10-27`
+> **Status:** STABLE · **Owner:** Industry Solutions Architecture · **Updated:** 2026-11-10
+> **Shipping status: SHIPPED with PHASE-035 (2026-11-10, migration
+> `0047_industry_rental_logistics.sql` — the configuration-only 0044/0046 convention).**
 
 Rent assets and move shipments: **rental contracts عقود الإيجار** with security
 **deposits التأمين** and **late fees رسوم التأخير**, plus milestone-based
-**shipment tracking تتبع الشحنات**. Ships in PHASE-019 (contract foundation from the CRM
-phase; carrier-adapter feeds arrive with PHASE-023 integrations). Manifest schema:
+**shipment tracking تتبع الشحنات**. **SHIPPED with PHASE-035** (the gap-closure
+phase that completed the CAPABILITY_MATRIX §3 pending-intake set — the PHASE-019
+deferral decision record is closed; carrier-adapter feeds remain with the PHASE-023
+integrations). Manifest schema:
 [../README.md](../README.md) §3. Full car-rental workflow with accounting effects:
 [../workflows/industry-workflows.md](../workflows/industry-workflows.md) (e).
 
@@ -18,6 +22,13 @@ phase; carrier-adapter feeds arrive with PHASE-023 integrations). Manifest schem
 
 ## Manifest
 
+The SHIPPED reconciled manifest (transcribed verbatim from
+`RENTAL_LOGISTICS_TEMPLATE_MANIFEST` in
+`packages/contracts/src/industry/templates.ts` — the same source the migration-0047
+seed, the contracts constant, and the extracted
+[manifests/manifest.rental_logistics.json](manifests/manifest.rental_logistics.json)
+keep byte-equivalent under `canonicalManifestJson`):
+
 ```json
 {
   "id": "industry.rental_logistics",
@@ -28,7 +39,7 @@ phase; carrier-adapter feeds arrive with PHASE-023 integrations). Manifest schem
     "industry.template_engine", "crm.service_contracts", "crm.rental_contracts",
     "crm.contract_deposits", "crm.late_fees", "crm.recurring_billing",
     "distribution.shipment_tracking", "inventory.serial_tracking", "items.item_master",
-    "partners.statements", "treasury.cash_accounts"
+    "partners.statements", "treasury.accounts"
   ],
   "default_modules_enabled": ["accounting", "partners", "items", "inventory", "sales",
     "treasury", "tax", "reporting", "crm", "distribution", "configuration"],
@@ -49,14 +60,13 @@ phase; carrier-adapter feeds arrive with PHASE-023 integrations). Manifest schem
   },
   "navigation_manifest": { "groups": [
     { "id": "rental", "label": { "en": "Rental", "ar": "التأجير" }, "order": 1, "items": [
-      { "id": "reservations", "label": { "en": "Reservations", "ar": "الحجوزات" }, "target": "crm.reservations" },
-      { "id": "contracts", "label": { "en": "Rental contracts", "ar": "عقود الإيجار" }, "target": "crm.rental_contracts" },
-      { "id": "fleet", "label": { "en": "Fleet & assets", "ar": "الأسطول والأصول" }, "target": "inventory.assets" },
-      { "id": "returns", "label": { "en": "Returns & inspections", "ar": "الإرجاع والفحص" }, "target": "crm.returns" }
+      { "id": "reservations", "label": { "en": "Reservations", "ar": "الحجوزات" }, "target": "crm.rental_contracts", "feature_key": "crm.rental_contracts" },
+      { "id": "contracts", "label": { "en": "Rental contracts", "ar": "عقود الإيجار" }, "target": "crm.contracts" },
+      { "id": "fleet", "label": { "en": "Fleet & assets", "ar": "الأسطول والأصول" }, "target": "items.item_master" },
+      { "id": "returns", "label": { "en": "Returns & inspections", "ar": "الإرجاع والفحص" }, "target": "crm.service_orders", "feature_key": "crm.service_orders" }
     ]},
     { "id": "logistics", "label": { "en": "Logistics", "ar": "الخدمات اللوجستية" }, "order": 2, "items": [
-      { "id": "shipments", "label": { "en": "Shipments", "ar": "الشحنات" }, "target": "distribution.shipments" },
-      { "id": "status_board", "label": { "en": "Status board", "ar": "لوحة الحالات" }, "target": "logistics.shipment_status_board" }
+      { "id": "shipments", "label": { "en": "Shipments", "ar": "الشحنات" }, "target": "distribution.shipment_tracking", "feature_key": "distribution.shipment_tracking" }
     ]}
   ]},
   "workflow_policies": {
@@ -81,11 +91,9 @@ phase; carrier-adapter feeds arrive with PHASE-023 integrations). Manifest schem
     "allow_negative_stock": false
   },
   "report_defaults": [
-    { "report_key": "rental.fleet_utilization", "pinned": true, "dashboard": true, "default_period": "this_month" },
-    { "report_key": "rental.late_fee_register", "pinned": true, "dashboard": false, "default_period": "this_month" },
-    { "report_key": "logistics.shipment_status_board", "pinned": true, "dashboard": true, "default_period": "today" },
-    { "report_key": "services.contract_revenue_schedule", "pinned": true, "dashboard": false, "default_period": "this_month" },
-    { "report_key": "partners.ar_aging", "pinned": true, "dashboard": false, "default_period": "this_month" }
+    { "report_key": "services.contract_revenue_schedule", "pinned": true, "dashboard": true, "default_period": "this_month" },
+    { "report_key": "ar.aging", "pinned": true, "dashboard": true, "default_period": "this_month" },
+    { "report_key": "inventory.valuation", "pinned": true, "dashboard": false, "default_period": "custom" }
   ],
   "onboarding_steps": [
     { "id": "coa_confirm", "title": { "en": "Confirm chart of accounts (customer deposits liability)", "ar": "تأكيد دليل الحسابات (التزامات تأمينات العملاء)" }, "required": true },
@@ -97,29 +105,46 @@ phase; carrier-adapter feeds arrive with PHASE-023 integrations). Manifest schem
     { "id": "shipments", "title": { "en": "Configure shipment milestones (logistics)", "ar": "تهيئة حالات الشحنات (اللوجستيات)" }, "required": false, "feature_key": "distribution.shipment_tracking" }
   ],
   "capability_prerequisites": {
-    "rental_contracts": { "level": "REQUIRED", "feature_keys": ["crm.rental_contracts"], "available_from_phase": "PHASE-019" },
+    "rental_contracts": { "level": "REQUIRED", "feature_keys": ["crm.rental_contracts"], "available_from_phase": "PHASE-035" },
     "service_contracts": { "level": "REQUIRED", "feature_keys": ["crm.service_contracts"], "available_from_phase": "PHASE-019" },
     "recurring_billing": { "level": "REQUIRED", "feature_keys": ["crm.recurring_billing"], "available_from_phase": "PHASE-019" },
-    "deposits_late_fees": { "level": "REQUIRED", "feature_keys": ["crm.contract_deposits", "crm.late_fees"], "available_from_phase": "PHASE-019" },
-    "shipment_tracking": { "level": "REQUIRED", "feature_keys": ["distribution.shipment_tracking"], "available_from_phase": "PHASE-019" },
-    "field_collections": { "level": "OPTIONAL", "feature_keys": ["treasury.receipts_disbursements"], "available_from_phase": "PHASE-017" },
+    "deposits_late_fees": { "level": "REQUIRED", "feature_keys": ["crm.contract_deposits", "crm.late_fees"], "available_from_phase": "PHASE-035" },
+    "shipment_tracking": { "level": "REQUIRED", "feature_keys": ["distribution.shipment_tracking"], "available_from_phase": "PHASE-035" },
+    "field_collections": { "level": "REQUIRED", "feature_keys": ["treasury.receipts_disbursements"], "available_from_phase": "PHASE-017" },
+    "job_cards": { "level": "OPTIONAL", "feature_keys": ["sales.job_cards"], "available_from_phase": "PHASE-017" },
+    "customer_price_tiers": { "level": "OPTIONAL", "feature_keys": ["items.price_lists", "distribution.customer_tiers"], "available_from_phase": "PHASE-017" },
+    "commissions": { "level": "OPTIONAL", "feature_keys": ["sales.commissions"], "available_from_phase": "PHASE-017" },
     "route_planning": { "level": "OPTIONAL", "feature_keys": ["distribution.routes"], "available_from_phase": "PHASE-017" },
     "barcode_pos": { "level": "OPTIONAL", "feature_keys": ["pos.terminals", "pos.sales", "pos.receipts"], "available_from_phase": "PHASE-016" },
-    "cashier_shifts": { "level": "OPTIONAL", "feature_keys": ["treasury.cashier_shifts"], "available_from_phase": "PHASE-016" }
+    "cashier_shifts": { "level": "OPTIONAL", "feature_keys": ["treasury.cashier_shifts"], "available_from_phase": "PHASE-016" },
+    "pdc_notes": { "level": "OPTIONAL", "feature_keys": ["notes.received", "notes.pdc_calendar"], "available_from_phase": "PHASE-027" },
+    "installment_terms": { "level": "OPTIONAL", "feature_keys": ["installments.plans", "installments.late_fees"], "available_from_phase": "PHASE-027" }
   }
 }
 ```
+
+**§J reconciliation notes (the 0025/0027/0039/0040/0044/0046 convention, applied at
+the PHASE-035 intake):** `treasury.cash_accounts` (the pre-intake docs name) →
+`treasury.accounts` (the LIVE catalog key); `partners.ar_aging` → `ar.aging` (the LIVE
+registry key); the report pins land on LIVE keys only —
+`services.contract_revenue_schedule` / `ar.aging` / `inventory.valuation` — while
+`rental.fleet_utilization`, `rental.late_fee_register`, and
+`logistics.shipment_status_board` have no live report keys, so register §J stays
+closed: zero new report keys. The navigation's logistics `status_board` item merged
+into the shipments item (one milestone-board capability); the rental group's items
+carry `feature_key` guards so degraded plans hide them cleanly.
 
 ## Enabled features (exact keys)
 
 | Feature key | Required? | Phase | Note |
 |---|---|---|---|
-| `crm.rental_contracts` | Required | PHASE-019 | Reservation→contract→return lifecycle; availability calendar |
-| `crm.contract_deposits`, `crm.late_fees` | Required | PHASE-019 | Liability-held deposits; grace-period fees |
+| `crm.rental_contracts` | Required | PHASE-035 | Reservation→contract→return lifecycle; availability calendar (the §25 intake key) |
+| `crm.contract_deposits`, `crm.late_fees` | Required | PHASE-035 | Liability-held deposits; grace-period fees (the §25 intake pair) |
 | `crm.recurring_billing` | Required | PHASE-019 | Monthly rental billing for long contracts |
-| `distribution.shipment_tracking` | Required | PHASE-019 | Manual milestones; carrier feeds PHASE-023 |
+| `distribution.shipment_tracking` | Required | PHASE-035 | Manual milestones; carrier feeds PHASE-023 (the §25 intake key) |
 | `inventory.serial_tracking` | Required | PHASE-010 | Each rentable unit is a serial item ("out on rent" status) |
 | `crm.service_contracts` | Required | PHASE-019 | Contract base rental contracts extend |
+| `treasury.accounts` | Required | PHASE-008 | Deposit receipt/release money movement |
 | `distribution.routes` | Optional | PHASE-017 | Delivery/pickup round planning |
 | `pos.sales`, `treasury.cashier_shifts` | Optional | PHASE-016 | Counter sales of supplies/accessories |
 
@@ -140,14 +165,13 @@ phase; carrier-adapter feeds arrive with PHASE-023 integrations). Manifest schem
 
 ## Default navigation (sample)
 
-| EN | AR | Target |
-|----|----|--------|
-| Reservations | الحجوزات | `crm.reservations` |
-| Rental contracts | عقود الإيجار | `crm.rental_contracts` |
-| Fleet & assets | الأسطول والأصول | `inventory.assets` |
-| Returns & inspections | الإرجاع والفحص | `crm.returns` |
-| Shipments | الشحنات | `distribution.shipments` |
-| Status board | لوحة الحالات | `logistics.shipment_status_board` |
+| EN | AR | Target | Feature key |
+|----|----|--------|-------------|
+| Reservations | الحجوزات | `crm.rental_contracts` | `crm.rental_contracts` |
+| Rental contracts | عقود الإيجار | `crm.contracts` | — |
+| Fleet & assets | الأسطول والأصول | `items.item_master` | — |
+| Returns & inspections | الإرجاع والفحص | `crm.service_orders` | `crm.service_orders` |
+| Shipments (incl. the status board) | الشحنات | `distribution.shipment_tracking` | `distribution.shipment_tracking` |
 
 ## Signature workflow — car rental (compact)
 
@@ -172,7 +196,7 @@ Numbered steps and per-step journals:
 | Serial tracking | On | One serial item per rentable unit |
 | Batch/expiry | Off | |
 | "Out on rent" status | On | Asset stays in inventory, flagged unavailable |
-| Depreciation schedules | Out of scope | FR-ACC-009 is priority 3 (PHASE-023+ era); until then carrying value is cost |
+| Depreciation schedules | Out of scope | FR-ACC-009 is priority 3; carrying value is cost |
 | Negative stock | Forbidden | |
 
 ## Document types emphasized
@@ -186,9 +210,9 @@ Numbered steps and per-step journals:
 
 ## Reports emphasized
 
-`rental.fleet_utilization` (dashboard), `rental.late_fee_register`,
-`logistics.shipment_status_board` (dashboard), `services.contract_revenue_schedule`,
-`partners.ar_aging` — see [../reports/README.md](../reports/README.md).
+`services.contract_revenue_schedule` (dashboard), `ar.aging` (dashboard),
+`inventory.valuation` — the LIVE registry keys the shipped manifest pins; see
+[../reports/README.md](../reports/README.md).
 
 ## Out of scope for this template
 

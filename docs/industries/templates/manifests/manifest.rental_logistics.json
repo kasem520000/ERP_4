@@ -14,7 +14,7 @@
     "inventory.serial_tracking",
     "items.item_master",
     "partners.statements",
-    "treasury.cash_accounts"
+    "treasury.accounts"
   ],
   "default_modules_enabled": [
     "accounting",
@@ -99,7 +99,8 @@
               "en": "Reservations",
               "ar": "الحجوزات"
             },
-            "target": "crm.reservations"
+            "target": "crm.rental_contracts",
+            "feature_key": "crm.rental_contracts"
           },
           {
             "id": "contracts",
@@ -107,7 +108,7 @@
               "en": "Rental contracts",
               "ar": "عقود الإيجار"
             },
-            "target": "crm.rental_contracts"
+            "target": "crm.contracts"
           },
           {
             "id": "fleet",
@@ -115,7 +116,7 @@
               "en": "Fleet & assets",
               "ar": "الأسطول والأصول"
             },
-            "target": "inventory.assets"
+            "target": "items.item_master"
           },
           {
             "id": "returns",
@@ -123,7 +124,8 @@
               "en": "Returns & inspections",
               "ar": "الإرجاع والفحص"
             },
-            "target": "crm.returns"
+            "target": "crm.service_orders",
+            "feature_key": "crm.service_orders"
           }
         ]
       },
@@ -141,15 +143,8 @@
               "en": "Shipments",
               "ar": "الشحنات"
             },
-            "target": "distribution.shipments"
-          },
-          {
-            "id": "status_board",
-            "label": {
-              "en": "Status board",
-              "ar": "لوحة الحالات"
-            },
-            "target": "logistics.shipment_status_board"
+            "target": "distribution.shipment_tracking",
+            "feature_key": "distribution.shipment_tracking"
           }
         ]
       }
@@ -207,34 +202,22 @@
   },
   "report_defaults": [
     {
-      "report_key": "rental.fleet_utilization",
-      "pinned": true,
-      "dashboard": true,
-      "default_period": "this_month"
-    },
-    {
-      "report_key": "rental.late_fee_register",
-      "pinned": true,
-      "dashboard": false,
-      "default_period": "this_month"
-    },
-    {
-      "report_key": "logistics.shipment_status_board",
-      "pinned": true,
-      "dashboard": true,
-      "default_period": "today"
-    },
-    {
       "report_key": "services.contract_revenue_schedule",
       "pinned": true,
-      "dashboard": false,
+      "dashboard": true,
       "default_period": "this_month"
     },
     {
-      "report_key": "partners.ar_aging",
+      "report_key": "ar.aging",
+      "pinned": true,
+      "dashboard": true,
+      "default_period": "this_month"
+    },
+    {
+      "report_key": "inventory.valuation",
       "pinned": true,
       "dashboard": false,
-      "default_period": "this_month"
+      "default_period": "custom"
     }
   ],
   "onboarding_steps": [
@@ -302,7 +285,7 @@
       "feature_keys": [
         "crm.rental_contracts"
       ],
-      "available_from_phase": "PHASE-019"
+      "available_from_phase": "PHASE-035"
     },
     "service_contracts": {
       "level": "REQUIRED",
@@ -324,19 +307,41 @@
         "crm.contract_deposits",
         "crm.late_fees"
       ],
-      "available_from_phase": "PHASE-019"
+      "available_from_phase": "PHASE-035"
     },
     "shipment_tracking": {
       "level": "REQUIRED",
       "feature_keys": [
         "distribution.shipment_tracking"
       ],
-      "available_from_phase": "PHASE-019"
+      "available_from_phase": "PHASE-035"
     },
     "field_collections": {
-      "level": "OPTIONAL",
+      "level": "REQUIRED",
       "feature_keys": [
         "treasury.receipts_disbursements"
+      ],
+      "available_from_phase": "PHASE-017"
+    },
+    "job_cards": {
+      "level": "OPTIONAL",
+      "feature_keys": [
+        "sales.job_cards"
+      ],
+      "available_from_phase": "PHASE-017"
+    },
+    "customer_price_tiers": {
+      "level": "OPTIONAL",
+      "feature_keys": [
+        "items.price_lists",
+        "distribution.customer_tiers"
+      ],
+      "available_from_phase": "PHASE-017"
+    },
+    "commissions": {
+      "level": "OPTIONAL",
+      "feature_keys": [
+        "sales.commissions"
       ],
       "available_from_phase": "PHASE-017"
     },
@@ -362,6 +367,22 @@
         "treasury.cashier_shifts"
       ],
       "available_from_phase": "PHASE-016"
+    },
+    "pdc_notes": {
+      "level": "OPTIONAL",
+      "feature_keys": [
+        "notes.received",
+        "notes.pdc_calendar"
+      ],
+      "available_from_phase": "PHASE-027"
+    },
+    "installment_terms": {
+      "level": "OPTIONAL",
+      "feature_keys": [
+        "installments.plans",
+        "installments.late_fees"
+      ],
+      "available_from_phase": "PHASE-027"
     }
   }
 }

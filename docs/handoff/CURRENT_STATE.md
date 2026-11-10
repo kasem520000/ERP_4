@@ -1,6 +1,6 @@
 # Current State
 
-> **Status:** LIVING DOCUMENT — updated at every phase completion · **Updated:** 2026-11-09
+> **Status:** LIVING DOCUMENT — updated at every phase completion · **Updated:** 2026-11-10
 
 What actually exists in this repository right now. Paired with
 [../planning/IMPLEMENTATION_STATUS.md](../planning/IMPLEMENTATION_STATUS.md) (phase
@@ -9,7 +9,7 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
 ## Repository contents
 
 - **Documentation blueprint v2.0 — COMPLETE** (v1.1 consolidated baseline + platform depth
-  & breadth expansion per [../EXPANSION_REGISTER.md](../EXPANSION_REGISTER.md)): 265
+  & breadth expansion per [../EXPANSION_REGISTER.md](../EXPANSION_REGISTER.md)): 319
   Markdown documents under `docs/` covering vision, product
   requirements, scope, glossary (EN↔AR), architecture (system overview, 18 ADRs,
   module boundaries, dependency rules, data flows, security, multi-tenancy, deployment,
@@ -17,8 +17,8 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
   status, release strategy, risk register), database (conventions, entity catalog, data
   dictionary, relationships, constraints/indexes, tenant isolation, migration strategy,
   backup/recovery, ERDs, table specs, seeds), product (personas, journeys, workflows,
-  BR-001…056 business rules, industry/feature catalogs — 22 modules, 172 feature keys
-  (131 v1.1 + 38 v2.0) — subscriptions & entitlements,
+  BR-001…056 business rules, industry/feature catalogs — 22 modules, 176 feature keys
+  (134 v1.1 + 38 v2.0 + 4 PHASE-035 intake) — subscriptions & entitlements,
   configuration engine), accounting (principles, bilingual CoA, posting engine,
   document lifecycle, journal rules with golden postings G-01…G-32, AR/AP, inventory
   accounting, period closing,
@@ -524,11 +524,22 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
     downstream / batch-summary walks) on the template-derived navigation +
     terminology (الوصفة / أمر الإنتاج / بوابة فحص الجودة / شجرة الدفعات),
     i18n parity 2556/2556 +
+    the PHASE-035 surfaces (the PUBLIC marketing landing page `/{locale}/welcome`
+    under the (marketing) route group — bilingual hero + labelled stats strip + 8
+    feature tiles + the 13-industry catalog live from GET platform/register/options +
+    3-step onboarding + pricing teaser live from GET public/plans + FAQ + CTA + footer,
+    on the PublicShell marketing variant (nav bar + footer); anonymous visitors land
+    there — the session home redirects them; the platform control-panel dashboard
+    `/{locale}/platform/overview` — 8 KPI tiles, tenant-status/plan/industry/country
+    distributions with bars, subscription statuses + e-invoicing funnel, recent platform
+    audit events, quick links, nav registry item platform.overview; and the payroll run
+    workspace's a4-payslip print button + preview dialog on the report-workspace iframe
+    pattern) +
     the nav item `reports.workspace`: session cookie +
     CSRF double-submit, generic proxy; login/register/forgot/accept on the
     public card shell; admin/console lists on DataTable archetypes with the
     navigation-driven app shell; CSP middleware (per-request nonce, §8 header
-    set, probe-tested against the built app); typed dictionaries at 2556 keys
+    set, probe-tested against the built app); typed dictionaries at 4,286 keys
     with triple parity enforcement (TS + runtime + CI script).
   - `apps/desktop` — **`@erp/desktop` (PHASE-021, the Tauri v2 shell runtime)**: ALL
     application logic in TypeScript (`src/**` — the dual-profile SQLite store with
@@ -642,6 +653,48 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
     evidence items are waived to first infrastructure availability by project-owner
     directive — the CI-equivalent local gate (`pnpm gate:local`) is green and is the
     recorded substitute; follow-ups tracked in the phase report §Deferred evidence.
+- **PHASE-035 gap-closure (2026-11-10) — the first post-roadmap maintenance
+  phase:** the user's review of `ERP_PLATFORM_PHASE034.zip` found four gaps and
+  this phase closes exactly those: (1) the PUBLIC marketing landing page
+  `apps/web/app/[locale]/(marketing)/welcome/page.tsx` — bilingual hero +
+  labelled stats strip (22 modules / 13 templates / 145 screens / 10
+  jurisdictions / offline sync) + 8 feature tiles + the 13-industry catalog
+  (live from GET platform/register/options) + 3-step onboarding + pricing
+  teaser (live from GET public/plans) + FAQ + CTA + footer, on the PublicShell
+  marketing variant (nav bar + footer); anonymous visitors now land on
+  /{locale}/welcome instead of the login form (the session home redirects
+  them); +100 i18n keys — 68 landing + 31 platform-console + 1 payslip-print
+  (ar=en=4,286 parity); (2) the platform control-panel
+  dashboard (لوحة تحكم المنصة) — `GET /api/v1/platform/overview` (permission
+  platform.tenants.view, audited per use as platform.console.overview_viewed)
+  + web `/{locale}/platform/overview` (8 KPI tiles,
+  tenant-status/plan/industry/country distributions with bars, subscription
+  statuses + e-invoicing funnel, recent platform audit events, quick links) +
+  nav registry item `platform.overview` + migration `0048_platform_overview.sql`
+  (the sanctioned SECURITY DEFINER jsonb aggregate `erp.platform_console_overview()`
+  over the tenant-RLS'd subscription/device/e-invoicing slices — the
+  erp.subscriptions_needing_attention() precedent from migration 0021; grouped
+  counts only, no tenant-identifying rows); (3) the THIRTEENTH industry
+  template `industry.rental_logistics` (Rental & Logistics / التأجير
+  والخدمات اللوجستية — the CAPABILITY_MATRIX §3 pending-intake set COMPLETED,
+  the PHASE-019 deferral closed): migration `0047_industry_rental_logistics.sql`
+  seeds the v1.0.0 manifest with the §J reconciliations
+  (treasury.cash_accounts→treasury.accounts, partners.ar_aging→ar.aging, report
+  pins on LIVE keys services.contract_revenue_schedule / ar.aging /
+  inventory.valuation) + the migration-0047 plan grants for
+  crm.rental_contracts / crm.contract_deposits / crm.late_fees /
+  distribution.shipment_tracking (business + enterprise; starter blocked —
+  tier-4 posture) + 7 new POLICY_REGISTRY keys (no-SETTINGS_REGISTRY, the
+  0039/0040 convention); golden effective-configs now 40 rows (13 templates ×
+  3 plans + no-template; business/enterprise pins recomputed, starter pins
+  byte-stable); (4) the payslip print template (a4-payslip) — the PHASE-029
+  honestly-admitted miss closed: the FIFTH versioned base print template in
+  @erp/ui/print (A4PayslipPayload + renderA4Payslip — one page per employee,
+  earnings/deductions two columns, net check row, batch-totals page) +
+  `GET /api/v1/payroll/runs/:id/payslips/print` (payroll.employees.view,
+  masked C-PII payload) + the run workspace's print button + preview dialog
+  (the report-workspace iframe pattern). CURRENT_SHIPPED_PHASE 034 → 035;
+  evidence: [../implementation/phases/reports/PHASE-035-COMPLETION.md](../implementation/phases/reports/PHASE-035-COMPLETION.md).
 - **Git:** initialized on `main` during PHASE-001 (the pre-implementation state was a
   plain directory — see the phase report's doc-reality reconciliation); baseline
   committed and tagged `blueprint/v1.1`; PHASE-001 implementation committed and tagged
@@ -699,9 +752,23 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
   incl. the FEFO dispensing pick and the G-26 dishonor restoring the claim
   exactly; the zero-clinical-surface CI gate — no clinical field, key, or
   screen exists anywhere in the shell)
-  (migrations 0001–0043 — schema_version 43; CURRENT_SHIPPED_PHASE
-  PHASE-031; 10 shipped industry templates; report registry 81 contracts;
-  permissions 245=245; web i18n 4,069=4,069; the centralized posting engine with the full
+  + PHASE-032 education · PHASE-033 agriculture · PHASE-034 consolidation
+  (the final roadmap phase — the Enterprise Depth gate; the 2026-11-09
+  restoration merge united the lost 028–031 siblings, so PHASE-001..034 are
+  ALL COMPLETE in one build — every shipped phase's evidence is in its
+  completion report) + **PHASE-035 GAP-CLOSURE (2026-11-10 — the first
+  post-roadmap maintenance phase: the user's review of
+  `ERP_PLATFORM_PHASE034.zip` found four gaps and this phase closes exactly
+  those — the public marketing landing page `/{locale}/welcome`, the platform
+  control-panel dashboard `/{locale}/platform/overview` over the sanctioned
+  migration-0048 SECURITY DEFINER aggregate, the THIRTEENTH industry template
+  `industry.rental_logistics` by migration 0047, and the a4-payslip print
+  template with `GET /api/v1/payroll/runs/:id/payslips/print`)**
+  (migrations 0001–0048 — schema_version 48 (0047 rental template + 0048
+  platform overview definer); CURRENT_SHIPPED_PHASE
+  PHASE-035; 13 shipped industry templates (13/13 manifests validated); report
+  registry 85 contracts;
+  permissions 245=245; web i18n 4,286=4,286; the centralized posting engine with the full
   invariant suite is live and proven by its consumers — treasury posts every
   money movement through it, tax stamps every tax-carrying line with frozen
   rate snapshots BR-033, inventory posts every stock movement through it

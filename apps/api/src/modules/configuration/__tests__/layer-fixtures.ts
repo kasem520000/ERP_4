@@ -8,6 +8,7 @@ import {
   GROCERY_MANIFEST,
   HEALTHCARE_TEMPLATE_MANIFEST,
   PROFESSIONAL_SERVICES_TEMPLATE_MANIFEST,
+  RENTAL_LOGISTICS_TEMPLATE_MANIFEST,
   RESTAURANT_MANIFEST,
   RETAIL_MANIFEST,
   WHOLESALE_TEMPLATE_MANIFEST,
@@ -28,17 +29,18 @@ import type {
 } from "../domain/layer-model";
 
 /**
- * Unit-test layer-input fixtures (PHASE-015 §6): the twelve shipped
+ * Unit-test layer-input fixtures (PHASE-015 §6): the THIRTEEN shipped
  * manifests (the seven base + the PHASE-030 wholesale/electronics pair +
  * the PHASE-031 healthcare shell + the PHASE-032 education template + the
- * PHASE-033 agriculture template — the two lineages' template sets united
- * by the restoration merge) × the three plan seeds (migration
- * 0008/0021/0024/0025/0026/0027 + the PHASE-027 0038 grants — the
- * installments/notes set the education + wholesale templates' REQUIRED/
- * OPTIONAL chains resolve through — key and limits lists, transcribed) ×
- * the SA jurisdiction seed (migration 0013). Shared by config-resolution
- * spec (property/precedence tests) and golden-effective-configs.spec
- * (pinned hashes).
+ * PHASE-033 agriculture template + the PHASE-035 rental_logistics
+ * template — the §3 pending-intake set completed) × the three plan seeds
+ * (migration 0008/0021/0024/0025/0026/0027 + the PHASE-027 0038 grants +
+ * the PHASE-035 0047 intake grants — the installments/notes/rental sets the
+ * education + wholesale + rental templates' REQUIRED/OPTIONAL chains
+ * resolve through — key and limits lists, transcribed) × the SA
+ * jurisdiction seed (migration 0013). Shared by config-resolution spec
+ * (property/precedence tests) and golden-effective-configs.spec (pinned
+ * hashes).
  *
  */
 
@@ -55,6 +57,7 @@ export const SHIPPED_TEMPLATES: readonly IndustryTemplateManifest[] = [
   ELECTRONICS_TEMPLATE_MANIFEST,
   HEALTHCARE_TEMPLATE_MANIFEST,
   WHOLESALE_TEMPLATE_MANIFEST,
+  RENTAL_LOGISTICS_TEMPLATE_MANIFEST,
 ];
 
 /** L1 from a shipped manifest (applied state, no tenant overrides). */
@@ -229,6 +232,14 @@ const BUSINESS_KEYS: readonly string[] = [
   "notes.dishonor", "notes.discounting", "notes.reports",
   "installments.plans", "installments.schedules", "installments.collections",
   "installments.late_fees", "installments.reports",
+  // PHASE-035 transcription of the 0047 plan grants (the §25 catalog-intake
+  // wave — crm.rental_contracts / crm.contract_deposits / crm.late_fees /
+  // distribution.shipment_tracking → business + enterprise, starter does
+  // NOT get them): the rental_logistics template's REQUIRED chain
+  // (rental_contracts / deposits_late_fees / shipment_tracking) resolves
+  // through exactly these grants — the 0025/0026/0027/0038 fixture role.
+  "crm.rental_contracts", "crm.contract_deposits",
+  "crm.late_fees", "distribution.shipment_tracking",
 ];
 
 const ENTERPRISE_KEYS: readonly string[] = [

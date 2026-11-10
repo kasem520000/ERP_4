@@ -308,6 +308,33 @@ export interface SupportSessionRow {
   status: string;
 }
 
+/**
+ * GET /platform/overview → data (PHASE-035 §3): the platform control-panel
+ * dashboard aggregate — tenant counters/distributions, audit activity, and
+ * the RLS-blocked subscription/device/e-invoicing slices (grouped counts
+ * only; the sanctioned definer read behind them).
+ */
+export interface PlatformOverview {
+  tenantsTotal: number;
+  tenantsByStatus: { status: string; count: number }[];
+  newTenants30d: number;
+  newTenants7d: number;
+  industryDistribution: { templateKey: string; count: number }[];
+  countryDistribution: { countryCode: string; count: number }[];
+  auditLast24h: number;
+  auditLast7d: number;
+  recentAudit: { at: string; action: string; entityType: string }[];
+  planDistribution: {
+    planKey: string;
+    planName: string;
+    planNameAr: string;
+    count: number;
+  }[];
+  subscriptionStatuses: { status: string; count: number }[];
+  devices: { total: number; active: number; revoked: number };
+  einvoicingByStatus: { status: string; count: number }[];
+}
+
 /** GET /platform/tenants → rows (cursor-paginated; the UI requests limit=200). */
 export interface ConsoleTenantSummary {
   id: string;

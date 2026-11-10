@@ -101,13 +101,18 @@ import {
 // 34-phase roadmap is now COMPLETE in this single build (001–034 all
 // implemented: 032 education + 033 agriculture + 034 consolidation from the
 // surviving lineage, 028–031 from the restored one, migrations renumbered
-// 0042–0046). The honest gate is therefore the roadmap's end: every
-// capability in every shipped manifest cites available_from_phase ≤ 034
-// (agriculture's crop_cycle_costing @ 033 and the education/consolidation
-// surfaces @ ≤ 033 included), so nothing phase-gates any more — the §4
-// mechanism itself stays proven by the synthetic post-roadmap PHASE-035
+// 0042–0046).
+// PHASE-035 gap closure shipped (2026-11-10): the marketing landing page +
+// the platform overview dashboard + the payslip print template + the
+// THIRTEENTH industry template (industry.rental_logistics) — the
+// CAPABILITY_MATRIX §3 pending-intake set completed (crm.rental_contracts /
+// crm.contract_deposits / crm.late_fees / distribution.shipment_tracking
+// are full FEATURE_DEPS rows with the 0047 business+enterprise plan
+// grants), so the rental manifest's REQUIRED chain resolves LIVE from this
+// bump; every shipped manifest now cites available_from_phase ≤ 035 and the
+// §4 mechanism stays proven by the synthetic post-roadmap PHASE-036
 // fixtures in template-prerequisites.spec.
-export const CURRENT_SHIPPED_PHASE = "PHASE-034";
+export const CURRENT_SHIPPED_PHASE = "PHASE-035";
 
 /** "PHASE-0NN" → the numeric phase (for ordering). */
 export function phaseNumber(phase: string): number {

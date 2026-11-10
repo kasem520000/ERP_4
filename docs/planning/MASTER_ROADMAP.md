@@ -1,6 +1,6 @@
 # Master Roadmap
 
-> **Status:** STABLE · **Owner:** Platform Architecture · **Updated:** 2026-10-28
+> **Status:** STABLE · **Owner:** Platform Architecture · **Updated:** 2026-11-10
 
 The dependency-driven implementation roadmap: **34 phases in 11 stage groups** — stages 1–8
 are the v1.1 baseline; stages 9–11 are the Blueprint v2.0 post-GA expansion
@@ -156,6 +156,29 @@ P034 → **Enterprise Depth release** — full expansion dependencies in
 | [PHASE-032](../implementation/phases/PHASE-032.md) | Education Commercial Shell | 025, 015, 027 | `industry.education` commercial shell: tuition contracts, installment plans, sibling discounts |
 | [PHASE-033](../implementation/phases/PHASE-033.md) | Agriculture Commercial Shell | 025, 015, 018 | `industry.agriculture` commercial shell: crop-cycle costing via BOM, harvest batches, livestock-as-serials |
 | [PHASE-034](../implementation/phases/PHASE-034.md) | Multi-Entity Consolidation | 025, 013, 026, 029 | Read-only consolidation runs + elimination journals in the parent's consolidation books, zero cross-tenant writes (INV-026, golden G-32) → **Enterprise Depth release** |
+| [PHASE-035](../implementation/phases/PHASE-035.md) | Gap-Closure: Marketing Landing, Platform Dashboard, Rental & Logistics Template, Payslip Print | 034 | **Post-roadmap maintenance phase (2026-11-10)** — the four gaps the user's review of `ERP_PLATFORM_PHASE034.zip` found, closed: the public marketing landing `/{locale}/welcome` · the platform control-panel dashboard `/{locale}/platform/overview` (migration 0048's sanctioned definer aggregate) · the THIRTEENTH industry template `industry.rental_logistics` (migration 0047 — 13/13 templates shipped) · the a4-payslip print template (the PHASE-029 miss closed) |
+
+> **Post-roadmap phases (note).** The 34 phases above are the complete roadmap — the
+> stage groups, dependency graph, and release gates are closed and unchanged. Work
+> past PHASE-034 is **gap-closure/maintenance**, recorded in the phase table of
+> [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) and governed by the §Handoff
+> maintenance/ops posture + the standing honest ledger
+> ([../handoff/NEXT_ACTION.md](../handoff/NEXT_ACTION.md)): additive, never re-opening
+> a closed gate. PHASE-035 (2026-11-10) is the first such phase.
+>
+> **Post-roadmap expansion v3.0 (2026-11-10).** A second, independent external
+> review of the delivered platform (three uploaded reports — a conformance audit, a
+> market-standard maturity verdict, and a 495-gap capability analysis) was reconciled
+> against the shipped tree and registered as the **Comprehensive-ERP Program**:
+> [POST_ROADMAP_EXPANSION_REGISTER.md](POST_ROADMAP_EXPANSION_REGISTER.md) — 23
+> planned phases **PHASE-036…PHASE-058** (extensibility/activation/brand/workflow →
+> commerce depth → WMS/manufacturing-MRP/HRIS/payroll-compliance/projects →
+> tax-e-invoice-phase-1/integration-fabric/BI → QMS/CMMS/UX-growth, with an
+> ADR-gated AI proposal last). Each phase document is written to the same canonical
+> 8-section standard as this roadmap's phases, carries a **PLANNED — NOT STARTED**
+> status, closes named code-verified gaps, and executes only on the owner's explicit
+> phase order (delivery discipline: one phase per archive). The 34-phase gates above
+> are untouched; nothing in 036+ may re-open a closed gate.
 
 ## Release gates
 

@@ -164,7 +164,7 @@ export function ConsolidationGroupDetail({
 
   async function updateMember(
     member: GroupMemberRow,
-    patch: { percent?: string; status?: string; note?: string },
+    patch: { percent?: string; status?: string; note?: string | null },
   ): Promise<void> {
     setError(null);
     if (patch.percent !== undefined && !PERCENT_RE.test(patch.percent)) {

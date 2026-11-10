@@ -171,6 +171,39 @@ export interface Dictionary {
   navSupport: string;
   navPlatformSection: string;
   navPlatformConsole: string;
+  navPlatformOverview: string;
+
+  // PHASE-035 · the platform control-panel dashboard (/{locale}/platform/overview).
+  platformOverviewTitle: string;
+  platformOverviewIntro: string;
+  platformOverviewTenantsTotal: string;
+  platformOverviewNew30d: string;
+  platformOverviewNew7d: string;
+  platformOverviewAudit24h: string;
+  platformOverviewAudit7d: string;
+  platformOverviewDevicesActive: string;
+  platformOverviewDevicesRevoked: string;
+  platformOverviewStatusHeading: string;
+  platformOverviewPlansHeading: string;
+  platformOverviewIndustriesHeading: string;
+  platformOverviewCountriesHeading: string;
+  platformOverviewSubStatusHeading: string;
+  platformOverviewEinvoicingHeading: string;
+  platformOverviewActivityHeading: string;
+  platformOverviewEinvoicingEmpty: string;
+  platformOverviewSubStatusEmpty: string;
+  platformOverviewPlansEmpty: string;
+  platformOverviewIndustriesEmpty: string;
+  platformOverviewNoTemplate: string;
+  platformOverviewActivityEmpty: string;
+  platformOverviewQuickLinks: string;
+  platformOverviewQuickTenants: string;
+  platformOverviewQuickAudit: string;
+  platformOverviewQuickDevices: string;
+  platformOverviewQuickSync: string;
+  platformOverviewQuickSlo: string;
+  platformOverviewQuickEinvoicing: string;
+  platformOverviewCountLabel: string;
   navPlatformAudit: string;
 
   // -- P4-T12a: shared labels -------------------------------------------------
@@ -1713,6 +1746,76 @@ export interface Dictionary {
   pricingFamilyGrowth: string;
   pricingHaveAccount: string;
   pricingGoLogin: string;
+
+  // PHASE-035 · the public marketing landing page (/{locale}/welcome).
+  welcomeTitle: string;
+  welcomeTagline: string;
+  welcomeHeroBody: string;
+  welcomeHeroCtaPrimary: string;
+  welcomeHeroCtaSecondary: string;
+  welcomeTrialNote: string;
+  welcomeStatsModules: string;
+  welcomeStatsIndustries: string;
+  welcomeStatsScreens: string;
+  welcomeStatsJurisdictions: string;
+  welcomeStatsOffline: string;
+  welcomeFeaturesHeading: string;
+  welcomeFeaturesIntro: string;
+  welcomeFeaturesAccounting: string;
+  welcomeFeaturesAccountingBody: string;
+  welcomeFeaturesTreasury: string;
+  welcomeFeaturesTreasuryBody: string;
+  welcomeFeaturesSales: string;
+  welcomeFeaturesSalesBody: string;
+  welcomeFeaturesInventory: string;
+  welcomeFeaturesInventoryBody: string;
+  welcomeFeaturesPos: string;
+  welcomeFeaturesPosBody: string;
+  welcomeFeaturesPayroll: string;
+  welcomeFeaturesPayrollBody: string;
+  welcomeFeaturesReporting: string;
+  welcomeFeaturesReportingBody: string;
+  welcomeFeaturesOffline: string;
+  welcomeFeaturesOfflineBody: string;
+  welcomeIndustriesHeading: string;
+  welcomeIndustriesIntro: string;
+  welcomeIndustriesFromRegistry: string;
+  welcomeIndustriesTemplateHint: string;
+  welcomeIndustriesMoreLink: string;
+  welcomeStepsHeading: string;
+  welcomeStepsIntro: string;
+  welcomeStep1Title: string;
+  welcomeStep1Body: string;
+  welcomeStep2Title: string;
+  welcomeStep2Body: string;
+  welcomeStep3Title: string;
+  welcomeStep3Body: string;
+  welcomePricingHeading: string;
+  welcomePricingIntro: string;
+  welcomePricingAllLink: string;
+  welcomeFaqHeading: string;
+  welcomeFaqQ1: string;
+  welcomeFaqA1: string;
+  welcomeFaqQ2: string;
+  welcomeFaqA2: string;
+  welcomeFaqQ3: string;
+  welcomeFaqA3: string;
+  welcomeFaqQ4: string;
+  welcomeFaqA4: string;
+  welcomeCtaTitle: string;
+  welcomeCtaBody: string;
+  welcomeCtaButton: string;
+  welcomeFooterProduct: string;
+  welcomeFooterCompany: string;
+  welcomeFooterSupport: string;
+  welcomeFooterLangNote: string;
+  welcomeNavHome: string;
+  welcomeNavPricing: string;
+  welcomeNavLogin: string;
+  welcomeNavRegister: string;
+  welcomeFooterRights: string;
+  welcomePlansLoadError: string;
+  welcomeIndustriesLoadFallback: string;
 
   checkoutTitle: string;
   checkoutGraceNote: string;
@@ -4330,6 +4433,7 @@ export interface Dictionary {
   payRunPayout: string;
   payRunReverse: string;
   payRunPayslips: string;
+  payRunPayslipsPrint: string;
   payRunDraft: string;
   payRunPending: string;
   payRunPosted: string;
@@ -4691,6 +4795,40 @@ const ar: Dictionary = {
   navSupport: "جلسات الدعم",
   navPlatformSection: "إدارة المنصة",
   navPlatformConsole: "المنصة",
+  navPlatformOverview: "لوحة تحكم المنصة",
+
+  // PHASE-035 · لوحة تحكم المنصة (/{locale}/platform/overview).
+  platformOverviewTitle: "لوحة تحكم المنصة",
+  platformOverviewIntro:
+    "مؤشرات تشغيل المنصة لحظة بلحظة — المستأجرون والخطط والأنشطة التجارية وسجل التدقيق وصحة الأجهزة والفوترة الإلكترونية (قراءة مجمعة عبر النطاق، مسجلة لكل استخدام).",
+  platformOverviewTenantsTotal: "إجمالي المستأجرين",
+  platformOverviewNew30d: "مستأجرون جدد (30 يوًما)",
+  platformOverviewNew7d: "مستأجرون جدد (7 أيام)",
+  platformOverviewAudit24h: "أحداث التدقيق (24 ساعة)",
+  platformOverviewAudit7d: "أحداث التدقيق (7 أيام)",
+  platformOverviewDevicesActive: "أجهزة مفعّلة",
+  platformOverviewDevicesRevoked: "أجهزة ملغاة",
+  platformOverviewStatusHeading: "حالات المستأجرين",
+  platformOverviewPlansHeading: "توزيع الخطط",
+  platformOverviewIndustriesHeading: "الأنشطة التجارية",
+  platformOverviewCountriesHeading: "الدول",
+  platformOverviewSubStatusHeading: "حالات الاشتراك",
+  platformOverviewEinvoicingHeading: "قمع الفوترة الإلكترونية",
+  platformOverviewActivityHeading: "أحدث أحداث المنصة",
+  platformOverviewEinvoicingEmpty: "لا عمليات فوترة إلكترونية مسجلة بعد.",
+  platformOverviewSubStatusEmpty: "لا اشتراكات نشطة بعد.",
+  platformOverviewPlansEmpty: "لا توزيع خطط متاح.",
+  platformOverviewIndustriesEmpty: "لم يطبّق أي مستأجر قالب نشاط بعد.",
+  platformOverviewNoTemplate: "بدون قالب",
+  platformOverviewActivityEmpty: "لا أحداث منصة حديثة.",
+  platformOverviewQuickLinks: "مختصرات المنصة",
+  platformOverviewQuickTenants: "قائمة المستأجرين",
+  platformOverviewQuickAudit: "سجل المنصة",
+  platformOverviewQuickDevices: "الأجهزة",
+  platformOverviewQuickSync: "صحة المزامنة",
+  platformOverviewQuickSlo: "مؤشرات SLO",
+  platformOverviewQuickEinvoicing: "قمع الفوترة الإلكترونية",
+  platformOverviewCountLabel: "العدد",
   navPlatformAudit: "سجل المنصة",
 
   statusInactive: "غير نشط",
@@ -6227,6 +6365,91 @@ const ar: Dictionary = {
   pricingFamilyGrowth: "طبقة النمو",
   pricingHaveAccount: "لديك حساب بالفعل؟",
   pricingGoLogin: "تسجيل الدخول",
+
+  // PHASE-035 · صفحة الهبوط التسويقية العامة (/{locale}/welcome).
+  welcomeTitle: "منصة ERP للأعمال — نظام محاسبي متكامل",
+  welcomeTagline: "نظام تخطيط موارد المؤسسات للشركات الصغيرة والمتوسطة في المنطقة",
+  welcomeHeroBody:
+    "محاسبة مزدوجة قوية، مبيعات ومشتريات ومخزون ونقاط بيع ورواتب وأصول ثابتة وتقارير — بمنصة واحدة، عربية أولاً بالكامل، تعمل عبر الويب وسطح المكتب وأندرويد مع مزامنة دون اتصال.",
+  welcomeHeroCtaPrimary: "ابدأ تجربتك المجانية",
+  welcomeHeroCtaSecondary: "استعرض الخطط والأسعار",
+  welcomeTrialNote: "تجربة مجانية بدون بطاقة — تبدأ بخطة الأعمال.",
+  welcomeStatsModules: "وحدة أعمال",
+  welcomeStatsIndustries: "قالب نشاط تجاري",
+  welcomeStatsScreens: "شاشة عمل جاهزة",
+  welcomeStatsJurisdictions: "سلطة قضائية بدعم ضريبي",
+  welcomeStatsOffline: "مزامنة دون اتصال",
+  welcomeFeaturesHeading: "كل ما تحتاجه إدارتك المالية في مكان واحد",
+  welcomeFeaturesIntro:
+    "محرك ترحيل محاسبي واحد لا يتجاوزه أحد، قيود ذهبية موثقة، عزل بيانات لكل مستأجر على مستوى الصف، وواجهات عربية/إنجليزية بمعايير RTL صارمة.",
+  welcomeFeaturesAccounting: "المحاسبة والقيود",
+  welcomeFeaturesAccountingBody:
+    "دليل حسابات ثنائي اللغة، محرك ترحيل وحيد للقيود، فترات مالية وإقفال سنوي، وميزان مراجعة وقوائم مالية بفروق صفرية.",
+  welcomeFeaturesTreasury: "الخزينة والنقدية",
+  welcomeFeaturesTreasuryBody:
+    "سندات قبض وصرف، مصروفات، تحويلات، ورديات كاشير، تسوية بنكية، شيكات مؤجلة وتقويم استحقاق.",
+  welcomeFeaturesSales: "المبيعات والذمم",
+  welcomeFeaturesSalesBody:
+    "دورة كاملة من عرض السعر إلى الفاتورة والإشعار الدائن، حدود ائتمان، أعمار ديون، عمولات، وتقسيط.",
+  welcomeFeaturesInventory: "المخزون والمستودعات",
+  welcomeFeaturesInventoryBody:
+    "تقييم WAC/FIFO بدقة ستة منازل، دفعات وتواريخ صلاحية FEFO، أرقام تسلسلية وIMEI، جرد وتحويلات.",
+  welcomeFeaturesPos: "نقاط البيع",
+  welcomeFeaturesPosBody:
+    "كاونتر سريع مع سلة ودفع متعدد، وضع دون اتصال مع طابور مزامنة، تقارير Z، وطابق مطاعم مع طلبات المطبخ.",
+  welcomeFeaturesPayroll: "الموظفون والرواتب",
+  welcomeFeaturesPayrollBody:
+    "هياكل رواتب إصدارية، دورات احتساب وترحيل، قروض موظفين، مستحقات نهاية الخدمة، وقسيمة رواتب قابلة للطباعة.",
+  welcomeFeaturesReporting: "التقارير والقوائم",
+  welcomeFeaturesReportingBody:
+    "سجل تقارير بمكتبات عقود موثقة، تحقق آلي قبل التصدير، طباعة PDF/A وXLSX/CSV، وإقرار ضريبة القيمة المضافة.",
+  welcomeFeaturesOffline: "يعمل حتى دون إنترنت",
+  welcomeFeaturesOfflineBody:
+    "تطبيق سطح مكتب وتطبيق أندرويد ميداني بمزامنة اختلافات مزدوجة وطابور صادر مع استرداد التعارضات.",
+  welcomeIndustriesHeading: "مصمم لنشاطك التجاري تحديدًا",
+  welcomeIndustriesIntro:
+    "اختر قالب النشاط عند التسجيل أو الإعداد — تُفعّل الوحدات والمصطلحات وسير العمل المناسبة لنشاطك، وتظل إمكانية التبديل مضافة فقط دون فقد بيانات.",
+  welcomeIndustriesFromRegistry: "الأنشطة المدعومة",
+  welcomeIndustriesTemplateHint: "قالب جاهز — إصدار {version}",
+  welcomeIndustriesMoreLink: "استعرض كل التفاصيل في صفحة الأسعار",
+  welcomeStepsHeading: "ثلاث خطوات وتنطلق",
+  welcomeStepsIntro: "من التسجيل إلى أول فاتورة في جلسة إعداد موجهة واحدة.",
+  welcomeStep1Title: "أنشئ حسابك واشترك",
+  welcomeStep1Body: "سجل بيانات نشاطك واختر خطتك — تجربة مجانية تبدأ فورًا دون بطاقة.",
+  welcomeStep2Title: "حدد نشاطك التجاري",
+  welcomeStep2Body: "اختر القالب المناسب من كتالوج الأنشطة، أو ابدأ بمساحة عمل عامة وطبّق القالب لاحقًا.",
+  welcomeStep3Title: "أكمل الإعداد الموجه",
+  welcomeStep3Body: "دليل حسابات جاهز، فروع، أصناف وعملاء، رصيد افتتاحي — ثم أول دورة مبيعات كاملة.",
+  welcomePricingHeading: "خطط تنمو معك",
+  welcomePricingIntro: "ثلاث خطط خدمة ذاتية — البداية، الأعمال، والمؤسسات — مع إضافات الأنشطة المتخصصة.",
+  welcomePricingAllLink: "كل التفاصيل والمقارنة",
+  welcomeFaqHeading: "أسئلة شائعة",
+  welcomeFaqQ1: "هل المنصة عربية بالكامل؟",
+  welcomeFaqA1:
+    "نعم — عربية أولاً مع دعم كامل للاتجاه من اليمين لليسار (RTL) وبمكتبة مصطلحات ثنائية اللغة موثقة لكل شاشة، وبإمكانية التبديل إلى الإنجليزية في أي شاشة.",
+  welcomeFaqQ2: "هل تعمل دون اتصال بالإنترنت؟",
+  welcomeFaqA2:
+    "نعم — تطبيق سطح المكتب وتطبيق أندرويد الميداني يعملان دون اتصال مع طابور عمليات صادر ومزامنة اختلافات عند العودة، مع معالجة تعارضات موثقة.",
+  welcomeFaqQ3: "كيف تُعزل بيانات كل منشأة؟",
+  welcomeFaqA3:
+    "عزل على مستوى صفوف قاعدة البيانات (RLS) لكل مستأجر مع سجل تدقيق ملاحق لكل عملية حساسة، واختبارات عزل تلقائية في كل دورة تحقق.",
+  welcomeFaqQ4: "هل يمكنني تغيير النشاط التجاري لاحقًا؟",
+  welcomeFaqA4:
+    "نعم — تبديل القوائم مضاف فقط (BR-038): التبديل لا يحذف بياناتك؛ تُضاف إعدادات القالب الجديد فوق الموجود.",
+  welcomeCtaTitle: "جاهز لإدارة أعمالك بنظام واحد؟",
+  welcomeCtaBody: "ابدأ التجربة المجانية اليوم — إعداد موجه، وقالب لنشاطك، ودعم ثنائي اللغة.",
+  welcomeCtaButton: "أنشئ حسابك الآن",
+  welcomeFooterProduct: "المنتج",
+  welcomeFooterCompany: "الشركة",
+  welcomeFooterSupport: "الدعم",
+  welcomeFooterLangNote: "المنصة تتوفر بالعربية والإنجليزية — بدّل اللغة من أعلى الصفحة.",
+  welcomeNavHome: "الرئيسية",
+  welcomeNavPricing: "الأسعار",
+  welcomeNavLogin: "تسجيل الدخول",
+  welcomeNavRegister: "إنشاء حساب",
+  welcomeFooterRights: "جميع الحقوق محفوظة",
+  welcomePlansLoadError: "تعذر تحميل الخطط من الخدمة — يمكنك المراجعة لاحقًا أو الانتقال إلى صفحة الأسعار.",
+  welcomeIndustriesLoadFallback: "كتالوج الأنشطة يُحمّل من خيارات التسجيل — تعذر الوصول الآن.",
 
   checkoutTitle: "إتمام الدفع",
   checkoutGraceNote: "هذه الصفحة متاحة في وضع القراءة فقط — الدفع هو إجراء الحل.",
@@ -8861,6 +9084,7 @@ const ar: Dictionary = {
   payRunPayout: "اصرف (G-30)",
   payRunReverse: "اعكس",
   payRunPayslips: "قسائم الرواتب",
+  payRunPayslipsPrint: "طباعة القسائم (PDF)",
   payRunDraft: "مسودة",
   payRunPending: "بانتظار الاعتماد",
   payRunPosted: "مرحّل",
@@ -9212,6 +9436,40 @@ const en: Dictionary = {
   navSupport: "Support sessions",
   navPlatformSection: "Platform administration",
   navPlatformConsole: "Platform",
+  navPlatformOverview: "Platform dashboard",
+
+  // PHASE-035 · the platform control-panel dashboard (/{locale}/platform/overview).
+  platformOverviewTitle: "Platform dashboard",
+  platformOverviewIntro:
+    "Live platform operations KPIs — tenants, plans, business activities, audit activity, device health, and the e-invoicing funnel (a cross-tenant aggregate read, audited per use).",
+  platformOverviewTenantsTotal: "Total tenants",
+  platformOverviewNew30d: "New tenants (30 days)",
+  platformOverviewNew7d: "New tenants (7 days)",
+  platformOverviewAudit24h: "Audit events (24h)",
+  platformOverviewAudit7d: "Audit events (7 days)",
+  platformOverviewDevicesActive: "Active devices",
+  platformOverviewDevicesRevoked: "Revoked devices",
+  platformOverviewStatusHeading: "Tenant statuses",
+  platformOverviewPlansHeading: "Plan distribution",
+  platformOverviewIndustriesHeading: "Business activities",
+  platformOverviewCountriesHeading: "Countries",
+  platformOverviewSubStatusHeading: "Subscription statuses",
+  platformOverviewEinvoicingHeading: "E-invoicing funnel",
+  platformOverviewActivityHeading: "Recent platform events",
+  platformOverviewEinvoicingEmpty: "No e-invoicing submissions recorded yet.",
+  platformOverviewSubStatusEmpty: "No active subscriptions yet.",
+  platformOverviewPlansEmpty: "No plan distribution available.",
+  platformOverviewIndustriesEmpty: "No tenant has applied an industry template yet.",
+  platformOverviewNoTemplate: "No template",
+  platformOverviewActivityEmpty: "No recent platform events.",
+  platformOverviewQuickLinks: "Platform shortcuts",
+  platformOverviewQuickTenants: "Tenant list",
+  platformOverviewQuickAudit: "Platform audit",
+  platformOverviewQuickDevices: "Devices",
+  platformOverviewQuickSync: "Sync health",
+  platformOverviewQuickSlo: "SLO dashboard",
+  platformOverviewQuickEinvoicing: "E-invoicing funnel",
+  platformOverviewCountLabel: "Count",
   navPlatformAudit: "Platform audit",
 
   statusInactive: "Inactive",
@@ -10752,6 +11010,91 @@ const en: Dictionary = {
   pricingFamilyGrowth: "Growth tier",
   pricingHaveAccount: "Already have an account?",
   pricingGoLogin: "Sign in",
+
+  // PHASE-035 · the public marketing landing page (/{locale}/welcome).
+  welcomeTitle: "ERP Platform for Business — a complete accounting suite",
+  welcomeTagline: "Enterprise resource planning for small and medium businesses across MENA",
+  welcomeHeroBody:
+    "Double-entry accounting, sales, purchasing, inventory, POS, payroll, fixed assets and reporting — one platform, Arabic-first with full RTL, running on web, desktop and Android with offline sync.",
+  welcomeHeroCtaPrimary: "Start your free trial",
+  welcomeHeroCtaSecondary: "See plans & pricing",
+  welcomeTrialNote: "Free trial, no card required — starts on the Business plan.",
+  welcomeStatsModules: "business modules",
+  welcomeStatsIndustries: "industry templates",
+  welcomeStatsScreens: "working screens",
+  welcomeStatsJurisdictions: "tax jurisdictions",
+  welcomeStatsOffline: "offline sync",
+  welcomeFeaturesHeading: "Everything your finance operation needs, in one place",
+  welcomeFeaturesIntro:
+    "A single posting engine nobody bypasses, documented golden journal rules, per-tenant row-level isolation, and a rigorously RTL Arabic/English interface.",
+  welcomeFeaturesAccounting: "Accounting & journals",
+  welcomeFeaturesAccountingBody:
+    "Bilingual chart of accounts, a sole posting engine, fiscal periods and year-end close, trial balance and financial statements with zero-tolerance checks.",
+  welcomeFeaturesTreasury: "Treasury & cash",
+  welcomeFeaturesTreasuryBody:
+    "Receipts and payments, expenses, transfers, cashier shifts, bank reconciliation, post-dated cheques and a maturity calendar.",
+  welcomeFeaturesSales: "Sales & receivables",
+  welcomeFeaturesSalesBody:
+    "The full quote-to-invoice chain with credit notes, credit limits, AR aging, commissions and installment plans.",
+  welcomeFeaturesInventory: "Inventory & warehousing",
+  welcomeFeaturesInventoryBody:
+    "WAC/FIFO valuation at 6-decimal precision, batches and FEFO expiry, serials and IMEI, counts and transfers.",
+  welcomeFeaturesPos: "Point of sale",
+  welcomeFeaturesPosBody:
+    "A fast counter with cart and mixed tender, offline queue, Z reports, and a restaurant floor with kitchen tickets.",
+  welcomeFeaturesPayroll: "HR & payroll",
+  welcomeFeaturesPayrollBody:
+    "Versioned salary structures, calculation and posting runs, employee loans, end-of-service benefits, and printable payslips.",
+  welcomeFeaturesReporting: "Reports & statements",
+  welcomeFeaturesReportingBody:
+    "A contract-backed report registry with pre-export assertions, PDF/A and XLSX/CSV output, and the VAT return.",
+  welcomeFeaturesOffline: "Works even without internet",
+  welcomeFeaturesOfflineBody:
+    "A desktop app and a field-sales Android app with bidirectional delta sync, an outbox queue, and documented conflict recovery.",
+  welcomeIndustriesHeading: "Built for your exact line of business",
+  welcomeIndustriesIntro:
+    "Pick an industry template at signup or onboarding — modules, terminology and workflows adapt to your activity, and switching is additive-only with no data loss.",
+  welcomeIndustriesFromRegistry: "Supported activities",
+  welcomeIndustriesTemplateHint: "Ready template — version {version}",
+  welcomeIndustriesMoreLink: "See full details on the pricing page",
+  welcomeStepsHeading: "Three steps to go live",
+  welcomeStepsIntro: "From signup to your first invoice in one guided session.",
+  welcomeStep1Title: "Create your account",
+  welcomeStep1Body: "Register your business and pick a plan — the free trial starts immediately, no card needed.",
+  welcomeStep2Title: "Choose your business activity",
+  welcomeStep2Body: "Pick the matching template from the activity catalog, or start with a plain workspace and apply one later.",
+  welcomeStep3Title: "Finish guided onboarding",
+  welcomeStep3Body: "A ready chart of accounts, branches, items and partners, opening balances — then your first full sales cycle.",
+  welcomePricingHeading: "Plans that grow with you",
+  welcomePricingIntro: "Three self-serve plans — Starter, Business and Enterprise — plus specialized industry add-ons.",
+  welcomePricingAllLink: "Full details & comparison",
+  welcomeFaqHeading: "Frequently asked questions",
+  welcomeFaqQ1: "Is the platform fully Arabic?",
+  welcomeFaqA1:
+    "Yes — Arabic-first with full right-to-left support, a documented bilingual glossary behind every screen, and one-tap switching to English anywhere.",
+  welcomeFaqQ2: "Does it work offline?",
+  welcomeFaqA2:
+    "Yes — the desktop app and the field-sales Android app work offline with an operations outbox and delta sync on reconnect, with documented conflict handling.",
+  welcomeFaqQ3: "How is each business's data isolated?",
+  welcomeFaqA3:
+    "Row-level database isolation per tenant with an append-only audit trail on every sensitive operation, and automated isolation tests in every verification cycle.",
+  welcomeFaqQ4: "Can I change my business activity later?",
+  welcomeFaqA4:
+    "Yes — template switching is additive-only (BR-038): switching never deletes your data; the new template's settings layer on top.",
+  welcomeCtaTitle: "Ready to run your business on one system?",
+  welcomeCtaBody: "Start the free trial today — guided setup, a template for your activity, and bilingual support.",
+  welcomeCtaButton: "Create your account",
+  welcomeFooterProduct: "Product",
+  welcomeFooterCompany: "Company",
+  welcomeFooterSupport: "Support",
+  welcomeFooterLangNote: "The platform is available in Arabic and English — switch languages from the top of the page.",
+  welcomeNavHome: "Home",
+  welcomeNavPricing: "Pricing",
+  welcomeNavLogin: "Sign in",
+  welcomeNavRegister: "Get started",
+  welcomeFooterRights: "All rights reserved",
+  welcomePlansLoadError: "Could not load plans from the service — try again later or open the pricing page.",
+  welcomeIndustriesLoadFallback: "The activity catalog loads from registration options — unreachable right now.",
 
   checkoutTitle: "Checkout",
   checkoutGraceNote: "This page stays usable in read-only mode — paying is the resolving action.",
@@ -13390,6 +13733,7 @@ const en: Dictionary = {
   payRunPayout: "Payout (G-30)",
   payRunReverse: "Reverse",
   payRunPayslips: "Payslips",
+  payRunPayslipsPrint: "Print payslips (PDF)",
   payRunDraft: "Draft",
   payRunPending: "Pending approval",
   payRunPosted: "Posted",

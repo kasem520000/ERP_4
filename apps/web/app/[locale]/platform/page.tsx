@@ -60,7 +60,18 @@ export default async function PlatformPage({
   } else {
     content = (
       <div className="flex flex-col gap-4">
-        <PlatformSearchForm locale={localeValue} initialQuery={search} />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <PlatformSearchForm locale={localeValue} initialQuery={search} />
+          {/* PHASE-035 (T35-A3): the control-panel dashboard entry — the KPI
+              overview lives one tap ahead of the tenant list. */}
+          <a
+            href={`/${locale}/platform/overview`}
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-default bg-surface-card px-4 text-sm font-medium text-primary-700 outline-none transition-colors duration-150 ease-standard hover:border-strong hover:bg-surface-sunken"
+          >
+            <span aria-hidden="true">📊</span>
+            {d.platformOverviewTitle}
+          </a>
+        </div>
         <PlatformTenantsTable locale={localeValue} rows={tenants.data} />
       </div>
     );

@@ -10,6 +10,7 @@ import {
   GROCERY_MANIFEST,
   HEALTHCARE_TEMPLATE_MANIFEST,
   PROFESSIONAL_SERVICES_TEMPLATE_MANIFEST,
+  RENTAL_LOGISTICS_TEMPLATE_MANIFEST,
   RESTAURANT_MANIFEST,
   RETAIL_MANIFEST,
   SHIPPED_TEMPLATE_MANIFESTS,
@@ -110,14 +111,14 @@ function expectSingleIssue(
   }
 }
 
-describe("shipped industry template manifests (v1.0.0 — retail / grocery / restaurant / automotive / distribution / food_manufacturing / professional_services / education / agriculture / wholesale / electronics / healthcare)", () => {
-  it("all twelve parse against the §3 schema and round-trip identically", () => {
+describe("shipped industry template manifests (v1.0.0 — retail / grocery / restaurant / automotive / distribution / food_manufacturing / professional_services / education / agriculture / wholesale / electronics / healthcare / rental_logistics)", () => {
+  it("all thirteen parse against the §3 schema and round-trip identically", () => {
     for (const manifest of SHIPPED_TEMPLATE_MANIFESTS) {
       expect(parseIndustryTemplateManifest(manifest)).toStrictEqual(manifest);
     }
   });
 
-  it("the registry ships exactly the twelve ids at 1.0.0", () => {
+  it("the registry ships exactly the thirteen ids at 1.0.0", () => {
     expect(SHIPPED_TEMPLATE_MANIFESTS.map((manifest) => manifest.id)).toEqual([
       "industry.retail",
       "industry.grocery",
@@ -131,6 +132,7 @@ describe("shipped industry template manifests (v1.0.0 — retail / grocery / res
       "industry.wholesale",
       "industry.electronics",
       "industry.healthcare",
+      "industry.rental_logistics",
     ]);
     expect(SHIPPED_TEMPLATE_MANIFESTS.every((manifest) => manifest.version === "1.0.0")).toBe(true);
   });
@@ -917,6 +919,147 @@ describe("shipped industry template manifests (v1.0.0 — retail / grocery / res
     ).toMatchObject({
       required: false,
       feature_key: "notes.received",
+    });
+  });
+
+  it("the PHASE-035 rental_logistics template pins the live report keys and the rental/logistics groups (0047)", () => {
+    // The report pins: services.contract_revenue_schedule (the rental
+    // contract billing schedule — the 0027 registry key, verbatim), the
+    // composed `ar.aging` (the 0047 reconciliation — the doc draft said
+    // partners.ar_aging, the 0025/0027/0044/0046 convention), and
+    // inventory.valuation (the fleet-asset value pin; the docs' rental.
+    // fleet_utilization / rental.late_fee_register / logistics.
+    // shipment_status_board have no live registry keys — §J stays closed).
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.report_defaults.map((pin) => pin.report_key)).toEqual([
+      "services.contract_revenue_schedule",
+      "ar.aging",
+      "inventory.valuation",
+    ]);
+    expect(
+      RENTAL_LOGISTICS_TEMPLATE_MANIFEST.report_defaults.find(
+        (pin) => pin.report_key === "services.contract_revenue_schedule",
+      ),
+    ).toMatchObject({ pinned: true, dashboard: true, default_period: "this_month" });
+    expect(
+      RENTAL_LOGISTICS_TEMPLATE_MANIFEST.report_defaults.find(
+        (pin) => pin.report_key === "ar.aging",
+      ),
+    ).toMatchObject({ pinned: true, dashboard: true, default_period: "this_month" });
+    expect(
+      RENTAL_LOGISTICS_TEMPLATE_MANIFEST.report_defaults.find(
+        (pin) => pin.report_key === "inventory.valuation",
+      ),
+    ).toMatchObject({ pinned: true, dashboard: false, default_period: "custom" });
+    // The rental + logistics navigation groups ship as reconciled (the
+    // fleet entry rides the item-master registry id; the shipments entry
+    // carries its intake feature key; the docs' status_board item merges
+    // into shipments — one milestone-board capability).
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.navigation_manifest.groups.map((group) => group.id)).toEqual([
+      "rental",
+      "logistics",
+    ]);
+    const rentalGroup = RENTAL_LOGISTICS_TEMPLATE_MANIFEST.navigation_manifest.groups.find(
+      (group) => group.id === "rental",
+    )!;
+    expect(rentalGroup.items.map((item) => item.target)).toEqual([
+      "crm.rental_contracts",
+      "crm.contracts",
+      "items.item_master",
+      "crm.service_orders",
+    ]);
+    const logisticsGroup = RENTAL_LOGISTICS_TEMPLATE_MANIFEST.navigation_manifest.groups.find(
+      (group) => group.id === "logistics",
+    )!;
+    expect(logisticsGroup.items.map((item) => item.target)).toEqual([
+      "distribution.shipment_tracking",
+    ]);
+    expect(
+      logisticsGroup.items.find((item) => item.target === "distribution.shipment_tracking")
+        ?.feature_key,
+    ).toBe("distribution.shipment_tracking");
+    // The §3 pending-intake set completed with PHASE-035: the four keys are
+    // full catalog rows now, so the REQUIRED chain resolves verbatim (the
+    // docs' own key names — no §J reconciliation needed for them); the
+    // treasury leg reconciles cash_accounts → accounts (the LIVE key).
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.required_feature_keys).toContain("crm.rental_contracts");
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.required_feature_keys).toContain("crm.contract_deposits");
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.required_feature_keys).toContain("crm.late_fees");
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.required_feature_keys).toContain(
+      "distribution.shipment_tracking",
+    );
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.required_feature_keys).toContain("treasury.accounts");
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.capability_prerequisites.rental_contracts).toEqual({
+      level: "REQUIRED",
+      feature_keys: ["crm.rental_contracts"],
+      available_from_phase: "PHASE-035",
+    });
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.capability_prerequisites.deposits_late_fees).toEqual({
+      level: "REQUIRED",
+      feature_keys: ["crm.contract_deposits", "crm.late_fees"],
+      available_from_phase: "PHASE-035",
+    });
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.capability_prerequisites.shipment_tracking).toEqual({
+      level: "REQUIRED",
+      feature_keys: ["distribution.shipment_tracking"],
+      available_from_phase: "PHASE-035",
+    });
+    // The seven rental/logistics workflow policies land as L1 defaults
+    // (all registry-only — the 0039/0040 no-SETTINGS_REGISTRY posture).
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.workflow_policies).toEqual({
+      rental_deposit_required: true,
+      late_fee_after_grace_hours: 3,
+      late_fee_calculation: "daily_rate_based",
+      damage_charge_requires_inspection: true,
+      deposit_release_requires_manager_approval: true,
+      overdue_rental_blocks_new_reservation: true,
+      shipment_milestones_manual: true,
+    });
+    // The RNT/INV/RCP/PAY/SHP numbering rules — the rental series is
+    // per-branch + approval-reserved; the rest posting-assigned.
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.document_numbering_defaults.rental_contract).toEqual({
+      prefix: "RNT",
+      format: "RNT-{yyyy}-{seq:5}",
+      per_branch: true,
+      reserve_on_approval: true,
+    });
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.document_numbering_defaults.shipment).toEqual({
+      prefix: "SHP",
+      format: "SHP-{yyyy}-{seq:6}",
+      per_branch: false,
+      reserve_on_approval: false,
+    });
+    // The fleet defaults: serial ON (one serial per rentable asset),
+    // batch/expiry/IMEI OFF, FEFO OFF, negative stock forbidden.
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.inventory_policy_defaults).toMatchObject({
+      costing_method: "WAC",
+      default_track_batch: false,
+      default_track_expiry: false,
+      default_track_serial: true,
+      default_imei_tracking: false,
+      fefo_picking: false,
+      allow_negative_stock: false,
+    });
+    // The rental-desk Arabic (عقد الإيجار / مبلغ التأمين / بوليصة الشحن) —
+    // the rental vocabulary, financial-first.
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.terminology_overrides["rental.contract"]).toEqual({
+      en: "Rental contract",
+      ar: "عقد الإيجار",
+    });
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.terminology_overrides["rental.deposit"]).toEqual({
+      en: "Security deposit",
+      ar: "مبلغ التأمين",
+    });
+    expect(RENTAL_LOGISTICS_TEMPLATE_MANIFEST.terminology_overrides["logi.waybill"]).toEqual({
+      en: "Waybill",
+      ar: "بوليصة الشحن",
+    });
+    // The onboarding checklist carries the gated logistics step (the
+    // §3 pending-intake key, now a full catalog row).
+    expect(
+      RENTAL_LOGISTICS_TEMPLATE_MANIFEST.onboarding_steps.find((step) => step.id === "shipments"),
+    ).toMatchObject({
+      required: false,
+      feature_key: "distribution.shipment_tracking",
     });
   });
 });

@@ -106,6 +106,16 @@ const TARGET_ROUTE_ALIASES: ReadonlyMap<string, string> = new Map([
   ["crm.contracts", "/crm/contracts"],
   ["crm.recurring_billing", "/crm/billing"],
   ["accounting.projects", "/accounting/projects"],
+  // PHASE-035 (T35-T1): the rental manifest's targets + the healthcare
+  // visits leg — the screens exist (the service-orders workspace since
+  // PHASE-019; rental contracts ride the contracts screen, reservations
+  // are draft rental contracts on the same surface). The shipments target
+  // (distribution.shipment_tracking) deliberately carries NO alias — the
+  // milestone-board capability has no dedicated web surface yet, so it
+  // renders the honest not-in-web-app note (the wholesale
+  // partners.statements precedent).
+  ["crm.service_orders", "/crm/service-orders"],
+  ["crm.rental_contracts", "/crm/contracts"],
 ]);
 
 /**

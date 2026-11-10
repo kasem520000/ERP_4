@@ -322,6 +322,20 @@
       "when": 1794480000000,
       "tag": "0046_industry_healthcare",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1794560000000,
+      "tag": "0047_industry_rental_logistics",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1794646000000,
+      "tag": "0048_platform_overview",
+      "breakpoints": true
     }
   ],
   "version": "7"

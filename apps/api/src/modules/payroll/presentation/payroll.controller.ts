@@ -410,6 +410,76 @@ export class PayrollController {
     return envelope(await this.payouts.payslips(UUID.parse(id), resolved));
   }
 
+  /**
+   * PHASE-035 §5 (T35-P2) — GET /api/v1/payroll/runs/:id/payslips/print:
+   * the payslip PRINT payload (the print-preview pattern — the same HTML
+   * the renderer prints, ADR-0011): the masked payslips batch rendered
+   * through the fifth versioned base template a4-payslip (one page per
+   * employee + a batch-totals page). Same permission gate as the batch
+   * itself (payroll.employees.view — the restricted C-PII read; the
+   * payload never carries unmasked national_id/bank fields, and no
+   * payroll field ever enters a log line).
+   */
+  @Get("runs/:id/payslips/print")
+  @RequirePermissions("payroll.employees.view")
+  async payslipsPrint(
+    @Req() request: Request,
+    @Param("id") id: string,
+    @Query("locale") locale?: string,
+  ) {
+    requireIdentity(request);
+    const resolved = LOCALE.parse(locale === undefined || locale === "" ? "ar" : locale);
+    const batch = await this.payouts.payslips(UUID.parse(id), resolved);
+    const { renderA4Payslip, PRINT_TEMPLATE_VERSIONS } = await import("@erp/ui/print");
+    const html = renderA4Payslip({
+      template: "a4-payslip",
+      locale: resolved,
+      title: { ar: "قسيمة رواتب", en: "Payslip" },
+      runNo: batch.run.runNo ?? batch.run.id,
+      periodName: batch.run.periodName,
+      branding: { tenantName: "ERP" },
+      slips: batch.slips.map((slip) => ({
+        employeeName:
+          resolved === "ar" && slip.employee.nameAr !== null && slip.employee.nameAr !== ""
+            ? slip.employee.nameAr
+            : slip.employee.name,
+        employeeNo: slip.employee.code,
+        department: null,
+        // Component kinds are ALLOWANCE | DEDUCTION | EMPLOYER_CONTRIBUTION
+        // (the structure registry): allowances render in the earnings
+        // column, deductions in the deductions column, and employer
+        // contributions stay OUT of the employee's slip columns (they are
+        // employer-side cost, carried by the run summary — not the slip's
+        // gross/net math).
+        components: slip.components
+          .filter((component) => component.kind !== "EMPLOYER_CONTRIBUTION")
+          .map((component) => ({
+            label: {
+              en: component.name,
+              ar: component.nameAr !== null ? component.nameAr : component.name,
+            },
+            kind: component.kind === "DEDUCTION" ? ("DEDUCTION" as const) : ("EARNING" as const),
+            amount: component.computed,
+          })),
+        gross: slip.gross,
+        deductions: slip.deductions,
+        net: slip.net,
+      })),
+      batchTotals: {
+        gross: batch.run.gross,
+        deductions: batch.run.deductions,
+        net: batch.run.net,
+        employees: batch.slips.length,
+      },
+    });
+    return envelope({
+      html,
+      template: "a4-payslip",
+      version: PRINT_TEMPLATE_VERSIONS["a4-payslip"] ?? 1,
+      employees: batch.slips.length,
+    });
+  }
+
   // -- loans ---------------------------------------------------------------------
 
   @Get("loans")

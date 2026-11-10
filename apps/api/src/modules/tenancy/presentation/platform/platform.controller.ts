@@ -139,6 +139,21 @@ export class PlatformConsoleController {
     });
   }
 
+  /**
+   * PHASE-035 §3 (T35-A2) — GET /api/v1/platform/overview: the platform
+   * control-panel DASHBOARD aggregate (web /{locale}/platform/overview —
+   * لوحة تحكم المنصة). Tenant counters/distributions + audit activity +
+   * the RLS-blocked subscription/device/e-invoicing slices through the
+   * sanctioned definer projection (migration 0048). Same permission gate as
+   * the tenant list (platform.tenants.view); audited per-use like it.
+   */
+  @Get("overview")
+  @RequirePermissions("platform.tenants.view")
+  async overview(@Req() request: Request): Promise<unknown> {
+    const identity = requireIdentity(request);
+    return envelope(await this.console.overview(identity.userId));
+  }
+
   @Get("tenants/:id")
   @RequirePermissions("platform.tenants.view")
   async tenantDetail(@Req() request: Request, @Param("id") tenantId: string): Promise<unknown> {

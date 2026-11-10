@@ -907,6 +907,20 @@ export const NAV_ITEMS: readonly NavItem[] = [
   // platform plane (ops tenant only): PERMISSION-gated only, no featureKey —
   // entitlements are a tenant-plane concept (matrix §3.10; the same rule the
   // FeatureEntitlementsGuard applies to platform routes).
+  // PHASE-035 §3 (T35-A3): the platform control-panel DASHBOARD — the KPI
+  // overview (tenants/plans/industries/audit/sync/e-invoicing aggregates)
+  // landing ahead of the tenant list, same permission key.
+  {
+    id: "platform.overview",
+    parentGroup: "settings",
+    label: { ar: "لوحة تحكم المنصة", en: "Platform dashboard" },
+    icon: "bar-chart",
+    route: "/platform/overview",
+    permission: "platform.tenants.view",
+    branchScoped: false,
+    archetype: "dashboard",
+    order: 78,
+  },
   {
     id: "platform.console",
     parentGroup: "settings",

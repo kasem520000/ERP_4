@@ -187,6 +187,14 @@ export const ROUTE_PERMISSIONS: readonly RoutePermissionRule[] = [
     path: "/api/v1/platform/tenants",
     permission: "platform.tenants.view",
   },
+  // PHASE-035 §3 (T35-A2): the platform control-panel dashboard aggregate
+  // (web /{locale}/platform/overview — the tenant list's own permission key;
+  // no new keys, the S-07 rule).
+  {
+    method: "GET",
+    path: "/api/v1/platform/overview",
+    permission: "platform.tenants.view",
+  },
   // PHASE-025 T9d: the SLO/error-budget dashboard aggregate (MONITORING
   // §5). Gated by the existing platform read-only observation key — the
   // plan's "platform.admin.access" is NOT a seeded key (the seed + matrix

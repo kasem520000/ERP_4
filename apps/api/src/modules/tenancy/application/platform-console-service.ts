@@ -10,6 +10,7 @@ import { NotFoundError } from "../../identity/api/identity";
 import { listTenantMembers } from "../../identity/api/identity";
 import { withPlatformScope, withTenantOnTx } from "../../../infra/db/tenant-context";
 import * as store from "../infrastructure/tenancy.store";
+import type { PlatformOverviewStats } from "../infrastructure/tenancy.store";
 import { PLATFORM_TENANT_ID } from "./lifecycle-service";
 import { EntitlementsService } from "./entitlements-service";
 
@@ -84,6 +85,27 @@ export class PlatformConsoleService {
           ? JSON.stringify({ createdAt: page[page.length - 1]!.createdAt, id: page[page.length - 1]!.id })
           : undefined;
       return { rows, hasMore, nextCursor };
+    });
+  }
+
+  /**
+   * PHASE-035 §3 (T35-A2): the platform control-panel DASHBOARD aggregate —
+   * tenant counters/distributions + audit activity + the RLS-blocked
+   * subscription/device/e-invoicing slices through the sanctioned definer
+   * projection (migration 0048). Audited per-use like the tenant list read
+   * (matrix §3.10 platform-scope reads).
+   */
+  async overview(actorId: string): Promise<PlatformOverviewStats> {
+    return withPlatformScope(async () => {
+      const stats = await store.platformOverviewStats();
+      await this.audit.recordPlatform({
+        action: "platform.console.overview_viewed",
+        entityType: "tenant",
+        entityId: PLATFORM_TENANT_ID,
+        actorId,
+        after: { tenantsTotal: stats.tenantsTotal },
+      });
+      return stats;
     });
   }
 

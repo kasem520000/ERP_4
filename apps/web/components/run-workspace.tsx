@@ -18,6 +18,7 @@ import {
   Badge,
   Button,
   DataTable,
+  Dialog,
   Input,
   MoneyInput,
   Select,
@@ -93,6 +94,12 @@ export function RunWorkspace({
   const [payslips, setPayslips] = useState<PayslipsResult | null>(null);
   const [payslipsBusy, setPayslipsBusy] = useState(false);
 
+  // PHASE-035 §5 (T35-P3): the payslip PRINT preview — the same HTML the
+  // renderer prints (a4-payslip, one page per employee + batch totals).
+  const [printHtml, setPrintHtml] = useState<string | null>(null);
+  const [printOpen, setPrintOpen] = useState(false);
+  const [printBusy, setPrintBusy] = useState(false);
+
   const activeCashAccounts = cashAccounts.filter((account) => account.status === "ACTIVE");
   const employeeById = new Map(employees.map((employee) => [employee.id, employee]));
 
@@ -166,6 +173,27 @@ export function RunWorkspace({
       return;
     }
     setPayslips(result.data);
+  }
+
+  // PHASE-035 §5 (T35-P3): fetch the print payload and open the preview
+  // dialog (the report-workspace print-preview pattern — iframe srcDoc,
+  // the same HTML the renderer prints).
+  async function openPayslipPrint(): Promise<void> {
+    setPrintBusy(true);
+    setError(null);
+    const result = await bffFetch<{
+      html: string;
+      template: string;
+      version: number;
+      employees: number;
+    }>(`payroll/runs/${run.id}/payslips/print?locale=${locale}`);
+    setPrintBusy(false);
+    if (!result.ok) {
+      setError(localizedPayrollError(d, result.error, result.retryAfterSeconds));
+      return;
+    }
+    setPrintHtml(result.data.html);
+    setPrintOpen(true);
   }
 
   function payout(): void {
@@ -296,6 +324,16 @@ export function RunWorkspace({
                 disabled={busy !== null}
               >
                 {d.payRunPayslips}
+              </Button>
+            )}
+            {lines.length > 0 && (
+              <Button
+                variant="secondary"
+                onClick={() => void openPayslipPrint()}
+                loading={printBusy}
+                disabled={busy !== null}
+              >
+                {d.payRunPayslipsPrint}
               </Button>
             )}
           </div>
@@ -547,6 +585,25 @@ export function RunWorkspace({
           empty={{ title: d.payRunEmptyLines }}
         />
       </Card>
+
+      {/* PHASE-035 §5 (T35-P3): the payslip print preview — the same HTML the
+          server renderer prints (a4-payslip; one page per employee). */}
+      <Dialog
+        open={printOpen}
+        onOpenChange={setPrintOpen}
+        title={d.payRunPayslipsPrint}
+        size="lg"
+      >
+        {printHtml !== null ? (
+          <iframe
+            srcDoc={printHtml}
+            title={d.payRunPayslipsPrint}
+            className="h-[70vh] w-full rounded-md border border-subtle bg-white"
+          />
+        ) : (
+          <p className="text-sm text-gray-600">{d.payRunEmptyLines}</p>
+        )}
+      </Dialog>
     </div>
   );
 }

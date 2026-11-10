@@ -4,8 +4,11 @@
 Runs deterministic, read-only checks over docs/:
   1. Relative markdown links resolve to existing files.
   2. Extracted industry manifests parse and carry `industry.*` ids (13 templates).
-  3. Phase references are within the canonical PHASE-001..034 range and
-     known-good for desktop (021) / android (022) / sync (020) / e-invoicing (023).
+  3. Phase references are within the canonical PHASE-001..058 range and
+     known-good for desktop (021) / android (022) / sync (020) / e-invoicing (023)
+     (035 = the first post-roadmap gap-closure phase; 036..058 = the post-roadmap
+     expansion v3.0 program — PLANNED phases documented 2026-11-10 in
+     planning/POST_ROADMAP_EXPANSION_REGISTER.md).
   4. Consolidation corrections are present (DEF-001/002/003/004/007/008 markers,
      no stale CASH_BANK purpose, no `treasury.receipts.*`/`treasury.payments.*`
      permission keys, blanket money regex gone).
@@ -88,7 +91,7 @@ def phase_ref_check() -> None:
         rel = f.relative_to(DOCS)
         for m in re.finditer(r"PHASE-(\d{3})", text):
             n = int(m.group(1))
-            if not (1 <= n <= 34):
+            if not (1 <= n <= 58):
                 bad.append(f"{rel}: out-of-range PHASE-{m.group(1)}")
         # targeted label check: lines that *declare* a client app's phase label
         # (e.g. mermaid nodes / ADR titles), not prose about phase eligibility order
@@ -105,7 +108,7 @@ def phase_ref_check() -> None:
                 n = re.search(r"desktop.{0,40}\(PHASE-(\d{3})\)", line, re.I).group(1)
                 if n != "021":
                     bad.append(f"{rel}: desktop label says PHASE-{n}, canon is 021")
-    check("2. phase refs within 001-034 and canon client labels (desktop=021/android=022)",
+    check("2. phase refs within 001-058 and canon client labels (desktop=021/android=022)",
           not bad, "; ".join(sorted(set(bad))[:6]))
 
 
@@ -174,7 +177,7 @@ def structure_check() -> None:
     have = {int(re.search(r"ADR-(\d{4})", a).group(1)) for a in adrs}
     check("4b. ADR set 0001..0018 complete", have == set(range(1, 19)), f"have={sorted(have)}")
     phases = sorted(p.name for p in (DOCS / "implementation" / "phases").glob("PHASE-*.md"))
-    check("4c. 34 phase documents present", len(phases) == 34, f"count={len(phases)}")
+    check("4c. 58 phase documents present (001-034 roadmap + 035 gap-closure + 036-058 expansion v3.0 planned)", len(phases) == 58, f"count={len(phases)}")
     n = len(md_files())
     print(f"INFO  total markdown files under docs/: {n}")
 
@@ -212,7 +215,7 @@ def expansion_check() -> None:
     check("4g. v2.0 decision records + ADR-0018 present and indexed", ok_dr)
 
     bad_ph = []
-    for n in range(26, 35):
+    for n in range(26, 59):
         p = DOCS / "implementation" / "phases" / f"PHASE-{n:03d}.md"
         if not p.exists():
             bad_ph.append(f"PHASE-{n:03d} missing"); continue
@@ -220,7 +223,7 @@ def expansion_check() -> None:
         for s in range(1, 9):
             if f"## {s}. " not in t:
                 bad_ph.append(f"PHASE-{n:03d}: no '## {s}. ' heading")
-    check("4h. PHASE-026..034 present with 8 canonical headings", not bad_ph, "; ".join(bad_ph[:5]))
+    check("4h. PHASE-026..058 present with 8 canonical headings", not bad_ph, "; ".join(bad_ph[:5]))
 
     ok_refs = (has("accounting/JOURNAL_RULES.md", "G-32") and
                has("accounting/ACCOUNTING_INVARIANTS.md", "INV-026") and

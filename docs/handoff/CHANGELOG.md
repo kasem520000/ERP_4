@@ -1,9 +1,119 @@
 # Changelog
 
-> **Status:** LIVING DOCUMENT — append-only, newest first · **Updated:** 2026-11-09
+> **Status:** LIVING DOCUMENT — append-only, newest first · **Updated:** 2026-11-10
 
 Format: `DATE — item — type` where type ∈ {BLUEPRINT, PHASE-NNN, DOCS, BREAKING-ARCH, DECISION}.
 
+- 2026-11-10 — **POST-ROADMAP EXPANSION v3.0 REGISTERED — the Comprehensive-ERP
+  Program (PHASE-036…PHASE-058 planned; zero code shipped — a documentation-only
+  revision)**: the owner forwarded a second, independent external review of the
+  platform (three uploaded reports: a conformance audit scoring the build ~9/10,
+  a market-standard maturity verdict "ERP-L3 (~7.2/10)", and a deep capability
+  analysis numbering **495 gaps** — 23 critical + 304 detailed + 191 commercial).
+  The review was **reconciled against the shipped tree** and became the binding
+  plan [docs/planning/POST_ROADMAP_EXPANSION_REGISTER.md](../planning/POST_ROADMAP_EXPANSION_REGISTER.md):
+  **§0.1-A EXCLUSIONS** — the items PHASE-035 had already closed (the marketing
+  landing, the platform dashboard, the 13th template rental_logistics, the
+  payslip print) removed from scope; **§0.1-B CORRECTIONS** — the external
+  reports' own §30 already-exists list re-verified and frozen (command palette,
+  shortcuts, PDC cycle, recurring_journals, partner_addresses/contacts,
+  partners.statements…); **§0.1-C ADDITIONS** — 14 owner-requested gaps the
+  external review missed (legal numbering series, item variants, item images,
+  item cross-refs, cost-center allocation cycles, WPS/GOSI files, ESS/MSS,
+  credit-hold automation, recurring sales invoices, duplicate-invoice detection,
+  scheduled statements, period-close checklist, UAE FTA port, sandbox/demo-data).
+  The program: **23 phases — PHASE-036 (extensibility foundation: custom fields
+  + productivity suite) · 037 (master-data depth + the activation residue
+  F-1/F-2/F-5/F-6/F-7/F-9) · 038 (brand/document engine v2 + QR-as-image) · 039
+  (workflow engine, multi-level approvals) · 040–042 (CRM depth, sourcing/RFQ,
+  customer lifecycle RMA/dunning/loyalty) · 043–045 (WMS, manufacturing routing/
+  work-centers, MRP) · 046–048 (HRIS core, payroll statutory/GOSI/WPS, projects
+  & GCC contracting) · 049–051 (foreign trade/LC, treasury intelligence, tax
+  expansion + ZATCA Phase-1 OFFLINE stack: TLV QR/ICV/PIH/UBL) · 052–053
+  (integration fabric: API keys/webhooks/WhatsApp-SMS ports/realtime; BI +
+  scheduled reports) · 054–057 (QMS, CMMS, enterprise identity/GDPR/tenant-backup,
+  UX polish/growth) · 058 (AI assistants — PROPOSED behind an ADR that revisits
+  SCOPE non-goal #9)**. Every phase doc is written to the canonical 8-section
+  standard with PLANNED — NOT STARTED status (58 phase documents now in the
+  tree; 343 markdown files under docs/). Governance updated in the same
+  revision: MASTER_ROADMAP's post-roadmap note (the v3.0 program paragraph),
+  IMPLEMENTATION_STATUS (the 23 PLANNED rows + header), NEXT_ACTION (next
+  eligible = PHASE-036 on the owner's explicit order; delivery = one phase per
+  archive `ERP_PLATFORM_PHASE03NN.zip`), EXPANSION_REGISTER (§P pointer), and
+  **scripts/validate_docs.py upgraded per the register §3.6**: phase-reference
+  range 001–035 → **001–058**, phase-doc count 35 → **58**, canonical-headings
+  sweep 026–035 → **026–058** — `docs:validate` re-run **29/29 PASS**. No
+  migrations, no code, no permissions/i18n/manifest changes: the shipped tree is
+  byte-identical outside docs/ and scripts/validate_docs.py — DOCS
+- 2026-11-10 — **PHASE-035 — GAP-CLOSURE (COMPLETE — the first post-roadmap
+  maintenance phase: the four gaps the user's review of `ERP_PLATFORM_PHASE034.zip`
+  found, closed)**: (1) **the public marketing landing page**
+  `apps/web/app/[locale]/(marketing)/welcome/page.tsx` (PUBLIC) — bilingual hero +
+  labelled stats strip (22 modules / 13 templates / 145 screens / 10 jurisdictions /
+  offline sync) + 8 feature tiles + the 13-industry catalog (live from GET
+  platform/register/options) + 3-step onboarding + pricing teaser (live from GET
+  public/plans) + FAQ + CTA + footer; anonymous visitors now land on /{locale}/welcome
+  instead of the login form (the session home redirects them); PublicShell gained the
+  marketing variant (nav bar + footer); +100 i18n keys — 68 landing + 31
+  platform-console + 1 payslip-print (ar=en=4,286 parity).
+  (2) **the platform control-panel dashboard (لوحة تحكم المنصة)** —
+  `GET /api/v1/platform/overview` (permission platform.tenants.view, audited per use
+  as platform.console.overview_viewed) + web `/{locale}/platform/overview` (8 KPI
+  tiles, tenant-status/plan/industry/country distributions with bars, subscription
+  statuses + e-invoicing funnel, recent platform audit events, quick links) + nav
+  registry item `platform.overview` + migration `0048_platform_overview.sql` (the
+  sanctioned SECURITY DEFINER jsonb aggregate `erp.platform_console_overview()` over
+  the tenant-RLS'd subscription/device/e-invoicing slices — the
+  erp.subscriptions_needing_attention() precedent from migration 0021; grouped counts
+  only, no tenant-identifying rows). (3) **the THIRTEENTH industry template —
+  industry.rental_logistics (Rental & Logistics / التأجير والخدمات اللوجستية)** — the
+  CAPABILITY_MATRIX §3 pending-intake set COMPLETED (the PHASE-019 deferral closed):
+  crm.rental_contracts / crm.contract_deposits / crm.late_fees /
+  distribution.shipment_tracking are now full FEATURE_DEPS catalog rows with the
+  migration-0047 plan grants (business + enterprise; starter blocked — tier-4
+  posture); migration `0047_industry_rental_logistics.sql` seeds the v1.0.0 manifest
+  with §J reconciliations (treasury.cash_accounts→treasury.accounts,
+  partners.ar_aging→ar.aging, report pins on LIVE keys
+  services.contract_revenue_schedule / ar.aging / inventory.valuation); 7 new
+  POLICY_REGISTRY keys (no-SETTINGS_REGISTRY, the 0039/0040 convention); the strict
+  capability-matrix reconciliation set now includes RNT; golden effective-configs: 40
+  rows now (13 templates × 3 plans + no-template) — all business/enterprise pins
+  recomputed, starter pins byte-stable. (4) **the payslip print template
+  (a4-payslip)** — the PHASE-029 honestly-admitted miss closed: the FIFTH versioned
+  base print template in @erp/ui/print (A4PayslipPayload + renderA4Payslip — one page
+  per employee, earnings/deductions two columns, net check row, batch-totals page) +
+  `GET /api/v1/payroll/runs/:id/payslips/print` (payroll.employees.view, masked C-PII
+  payload) + the run workspace's print button + preview dialog (the report-workspace
+  iframe pattern) + 3 new print-templates spec tests. Also shipped: TARGET_ROUTE_ALIASES
+  additions in apps/web (crm.service_orders → /crm/service-orders — also fixes the
+  healthcare visits nav item; crm.rental_contracts → /crm/contracts); the breadcrumbs
+  map gained platform/overview; CURRENT_SHIPPED_PHASE bumped PHASE-034 → PHASE-035
+  (the synthetic mechanism-proof fixtures moved to a deliberately post-roadmap phase
+  horizon — the §18 lesson-5 pattern — keyed on platform.payouts). Verification
+  (honest record): contracts package 56/56 (was 55); apps/api unit suite 42 files 479
+  tests ALL PASS in-sandbox (previously 395 pass + 5 file-load errors recorded — the
+  sandbox now resolves argon2/exceljs/reflect-metadata so even more suites ran);
+  migrations journal 48 entries; i18n parity ar=en=4,286 (check-i18n-parity PASS);
+  validate-manifests 13/13 (rental content hash
+  sha256:b47d17b1595860614df27e4132c7b568c013bcc4cf3d37a7afe25b0fb1b45f48);
+  template-prerequisites 37/37; golden-effective-configs 44/44;
+  capability-matrix-reconciliation 6/6; web typecheck zero errors in all PHASE-035
+  files (two pre-existing consolidation-file type errors FIXED in-phase; one
+  environment-only React-types bleed error in packages/ui icons.tsx remains — an
+  artifact of the nested sandbox checkout, not the repo); web unit tests 72/73 (1
+  failure = dual-React-copy environment artifact of the nested sandbox, not a code
+  defect); the __db__ suites (166 files) still require the live Postgres harness
+  exactly as before. Docs sync: the PHASE-035 phase doc + completion report;
+  IMPLEMENTATION_STATUS (the 035 row + the cross-cutting table refreshed to reality);
+  CURRENT_STATE (PHASE-035 surfaces + the 0001–0048/13-template/176-key counts);
+  NEXT_ACTION (the maintenance/ops handoff header); INDUSTRY_CATALOG +
+  FEATURE_CATALOG (the four intake keys — 176 feature keys: 134 v1.1 + 38 v2.0 + 4
+  PHASE-035 intake) + CAPABILITY_MATRIX §3 (the pending set now empty) + the
+  rental-logistics manifest reconciliation (docs .md + extracted JSON mirror the TS
+  manifest) + SUBSCRIPTION_AND_ENTITLEMENTS (rental/logistics AVAILABLE — 13 industry
+  add-ons all live, Financial Depth Pack unchanged) + NAVIGATION_MODEL §9 (the welcome
+  + platform.overview rows) + VALIDATION_REPORT (the PHASE-035 re-run line) +
+  MASTER_ROADMAP (the post-roadmap phases note) — **PHASE-NNN**
 - 2026-11-09 — **THE RESTORATION MERGE — PHASE-001…034 UNITED IN ONE
   BUILD (the final-project consolidation)**: the stage-9/10 siblings 028–031 (budgeting /
   payroll / wholesale+electronics templates / healthcare), lost to environment resets on

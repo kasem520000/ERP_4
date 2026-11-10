@@ -24,7 +24,7 @@ change-control process in [handoff/IMPLEMENTATION_PROTOCOL.md](handoff/IMPLEMENT
 2. [SCOPE_AND_NON_GOALS.md](SCOPE_AND_NON_GOALS.md) — what we are explicitly NOT building.
 3. [GLOSSARY.md](GLOSSARY.md) — controlled vocabulary (English ↔ Arabic). All other documents use these terms.
 4. [architecture/SYSTEM_OVERVIEW.md](architecture/SYSTEM_OVERVIEW.md) and [architecture/ARCHITECTURE_DECISIONS.md](architecture/ARCHITECTURE_DECISIONS.md).
-5. [planning/MASTER_ROADMAP.md](planning/MASTER_ROADMAP.md) — the 34 phases (stages 1–8 per v1.1; stages 9–11 per [EXPANSION_REGISTER.md](EXPANSION_REGISTER.md)).
+5. [planning/MASTER_ROADMAP.md](planning/MASTER_ROADMAP.md) — the 34 phases (stages 1–8 per v1.1; stages 9–11 per [EXPANSION_REGISTER.md](EXPANSION_REGISTER.md)) plus the post-roadmap gap-closure phase (PHASE-035, 2026-11-10).
 6. [handoff/AGENT_START_HERE.md](handoff/AGENT_START_HERE.md) — how to execute a phase.
 
 ## Consolidated authoritative documents (v2 layer)
@@ -56,7 +56,7 @@ conflict without a recorded DEF/CD correction, file a defect — do not silently
 | Directory | Responsibility | Key documents |
 |-----------|----------------|---------------|
 | `architecture/` | System structure, ADRs, module boundaries, dependency rules, data flow, security/multi-tenancy/deployment/observability architecture | `SYSTEM_OVERVIEW.md`, `ADR/` (18 records) |
-| `planning/` | Roadmap (34 phases), phase dependency graph, acceptance criteria, implementation status, release strategy, risk register | `MASTER_ROADMAP.md` |
+| `planning/` | Roadmap (34 phases + the post-roadmap gap-closure phase), phase dependency graph, acceptance criteria, implementation status, release strategy, risk register | `MASTER_ROADMAP.md` |
 | `database/` | PostgreSQL conventions, entity catalog, data dictionary, ERDs, tenant isolation, migration & backup strategy | `DATABASE_CONVENTIONS.md`, `ENTITY_CATALOG.md` |
 | `product/` | Personas, journeys, workflows, business rules, feature catalog, industry catalog (13 templates), subscriptions & entitlements, configuration engine | `FEATURE_CATALOG.md`, `CONFIGURATION_ENGINE.md` |
 | `accounting/` | Double-entry core: principles, chart of accounts, posting engine, document lifecycle, journal rules, AR/AP, inventory accounting, period closing, reconciliation, invariants | `POSTING_ENGINE.md`, `ACCOUNTING_INVARIANTS.md` |
@@ -69,14 +69,14 @@ conflict without a recorded DEF/CD correction, file a defect — do not silently
 | `security/` | Threat model, authorization matrix, data protection, secrets management, security test plan, incident response | `THREAT_MODEL.md`, `AUTHORIZATION_MATRIX.md` |
 | `testing/` | Test strategy and per-domain test plans (accounting, tenant isolation, sync, regression, performance) | `TEST_STRATEGY.md` |
 | `operations/` | Development setup, environments, CI/CD, deployment, backup/restore runbook, disaster recovery, monitoring, troubleshooting | `BACKUP_RESTORE_RUNBOOK.md` |
-| `implementation/` | Phase documents (29 mandatory sections each) and templates (phase, completion report, code review) | `phases/PHASE-001.md` … `PHASE-034.md` (026–034 per [EXPANSION_REGISTER.md](EXPANSION_REGISTER.md)) |
+| `implementation/` | Phase documents (29 mandatory sections each) and templates (phase, completion report, code review) | `phases/PHASE-001.md` … `PHASE-035.md` (026–034 per [EXPANSION_REGISTER.md](EXPANSION_REGISTER.md); 035 the post-roadmap gap-closure phase — 35 documents, 48 migrations, 13 templates, 145+ web screens shipped) |
 | `decisions/` | Decision records requiring product-owner approval, grouped by domain (product, technical, accounting, compliance) | `product/`, `technical/`, `accounting/`, `compliance/` |
 | `handoff/` | Agent entry point, implementation protocol, current state, next action, changelog, blueprint validation report | `AGENT_START_HERE.md` |
 
 ## Cross-reference rules
 
 1. Link to documents with relative Markdown links (e.g., `../accounting/POSTING_ENGINE.md`).
-2. Phases are referenced as `PHASE-001` … `PHASE-034` (three digits, hyphenated).
+2. Phases are referenced as `PHASE-001` … `PHASE-035` (three digits, hyphenated).
 3. Architecture decisions are referenced as `ADR-0001` … `ADR-0018`.
 4. Accounting invariants are referenced as `INV-001` … (see `accounting/ACCOUNTING_INVARIANTS.md`).
 5. Business rules are referenced as `BR-xxx` (see `product/BUSINESS_RULES.md`).

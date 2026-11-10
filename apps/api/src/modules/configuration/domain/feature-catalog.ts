@@ -143,6 +143,21 @@ export const FEATURE_DEPS: Readonly<Record<string, readonly string[]>> = Object.
   "crm.service_contracts": ["partners.directory"],
   "crm.recurring_billing": ["crm.service_contracts", "sales.invoices"],
   "crm.service_orders": ["crm.service_contracts", "inventory.stock_ledger"],
+  // PHASE-035 intake (FEATURE_CATALOG §25 protocol — the CAPABILITY_MATRIX §3
+  // pending set deferred by the PHASE-019 decision record completes here so
+  // the thirteenth template, industry.rental_logistics, resolves LIVE; the
+  // definitions are the matrix's own proposing source of truth):
+  //   · crm.rental_contracts — rental specialization of service contracts
+  //     (reservation, pickup/return, rate tables, availability);
+  //   · crm.contract_deposits — contract security deposits as on-account
+  //     credit items (BR-027);
+  //   · crm.late_fees — contract-term late-return/late-payment charges;
+  //   · distribution.shipment_tracking — consignment/shipment records with
+  //     milestone status and aging (manual milestones; adapters PHASE-023).
+  "crm.rental_contracts": ["crm.service_contracts"],
+  "crm.contract_deposits": ["crm.service_contracts"],
+  "crm.late_fees": ["crm.service_contracts"],
+  "distribution.shipment_tracking": ["partners.directory", "sales.invoices"],
   // manufacturing
   "manufacturing.bom": ["items.item_master"],
   "manufacturing.production_orders": ["manufacturing.bom", "inventory.stock_ledger"],

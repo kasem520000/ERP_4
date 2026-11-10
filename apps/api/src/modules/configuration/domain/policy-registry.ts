@@ -503,6 +503,60 @@ export const POLICY_REGISTRY: Readonly<Record<string, PolicyDefinition>> = Objec
     true,
     "PHASE-031 healthcare (§2 item 5): per-insurer exposure enforces through the EXISTING per-partner credit_limit before invoice save (BR-001 machinery, PHASE-012) — the template sets the enforcement posture, never new mathematics; cross-insurer group exposure aggregation is NOT fabricated (consolidation territory, documented honestly).",
   ),
+  // --- rental & logistics (PHASE-035) --------------------------------------
+  // The thirteenth template's typed policy keys (docs/industries/templates/
+  // rental-logistics.md §workflow-policies — the manifest's own proposing
+  // source). None maps onto a SETTINGS_REGISTRY key (the 0039 education /
+  // 0040 agriculture posture): they land under their raw policy-key names
+  // as L1 manifest defaults, so non-rental tenants' policy maps stay
+  // byte-stable.
+  rental_deposit_required: booleanPolicy(
+    "rental_deposit_required",
+    "crm",
+    true,
+    "PHASE-035 rental: a rental contract requires a security deposit (مبلغ التأمين) at pickup — received as an ON-ACCOUNT credit amount against the customer (BR-027); release or application at return settles against open items, never a second ledger.",
+  ),
+  late_fee_after_grace_hours: Object.freeze({
+    key: "late_fee_after_grace_hours",
+    valueType: "number",
+    default: 3,
+    module: "crm",
+    description:
+      "PHASE-035 rental: the grace window (hours) past the agreed return time before late fees accrue — fee lines generate from the contract's rate table terms (CAPABILITY_MATRIX deposits_late_fees).",
+  } satisfies PolicyDefinition),
+  late_fee_calculation: Object.freeze({
+    key: "late_fee_calculation",
+    valueType: "enum",
+    enumValues: Object.freeze(["daily_rate_based", "flat_per_occurrence"]),
+    default: "daily_rate_based",
+    module: "crm",
+    description:
+      "PHASE-035 rental: how the late fee computes — daily_rate_based charges the daily rate per late day (the CAPABILITY_MATRIX proposing definition), flat_per_occurrence a single contract-term charge.",
+  } satisfies PolicyDefinition),
+  damage_charge_requires_inspection: booleanPolicy(
+    "damage_charge_requires_inspection",
+    "crm",
+    true,
+    "PHASE-035 rental: charging for damage at return requires a recorded damage inspection (فحص الأضرار) — an inspection-free damage charge line is rejected; the inspection rides crm.service_orders machinery.",
+  ),
+  deposit_release_requires_manager_approval: booleanPolicy(
+    "deposit_release_requires_manager_approval",
+    "crm",
+    true,
+    "PHASE-035 rental: releasing or applying a held security deposit requires manager approval — the BR-021 supervisor-attestation posture applied to deposit settlement.",
+  ),
+  overdue_rental_blocks_new_reservation: booleanPolicy(
+    "overdue_rental_blocks_new_reservation",
+    "crm",
+    true,
+    "PHASE-035 rental: a customer with an overdue (unreturned) rental cannot place a new reservation — the BR-001 credit-block posture applied to asset availability rather than money.",
+  ),
+  shipment_milestones_manual: booleanPolicy(
+    "shipment_milestones_manual",
+    "distribution",
+    true,
+    "PHASE-035 logistics: shipment milestone updates (booking → pickup → in transit → customs → delivered) are entered manually — carrier-adapter feeds arrive with the PHASE-023 integrations substrate and stay OFF by default.",
+  ),
 });
 
 export const POLICY_KEYS: readonly string[] = Object.keys(POLICY_REGISTRY);

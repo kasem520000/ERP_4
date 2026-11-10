@@ -100,3 +100,33 @@ PHASE-025 COMPLETE — GA RELEASE, and the GA gate criteria are enumerated close
 with gate-run evidence (1 INFRA-GATED / 5 CLOSED-LOCAL-TIER / 5 CLOSED — the honest
 ledger). Entity catalog unchanged (156 tables; no migrations this phase — tuning
 only per §4).
+
+## Re-run — PHASE-035 (gap-closure) · 2026-11-10
+
+Post-phase validation with the gap-closure tree: **docs:validate 29/29 green** over
+**319 markdown documents** (the corpus gained the PHASE-035 phase document
+[../implementation/phases/PHASE-035.md](../implementation/phases/PHASE-035.md) and its
+completion report
+[../implementation/phases/reports/PHASE-035-COMPLETION.md](../implementation/phases/reports/PHASE-035-COMPLETION.md);
+the "202 total markdown files" statement above stays the recorded historical baseline
+per DEF-009). The cross-document consistency facts re-verified at the phase:
+
+- The rental-logistics manifest is reconciled everywhere: the docs
+  [rental-logistics.md](../industries/templates/rental-logistics.md) block and the
+  extracted [manifest.rental_logistics.json](../industries/templates/manifests/manifest.rental_logistics.json)
+  mirror `RENTAL_LOGISTICS_TEMPLATE_MANIFEST` in
+  `packages/contracts/src/industry/templates.ts` exactly (canonical-JSON deep-equal;
+  `validate:manifests` 13/13 — rental content hash
+  `sha256:b47d17b1595860614df27e4132c7b568c013bcc4cf3d37a7afe25b0fb1b45f48`).
+- CAPABILITY_MATRIX §3's pending-intake set is now **empty** — every matrix key is a
+  catalog key; the four PHASE-035 intake keys are full FEATURE_CATALOG rows (§13/§15),
+  so the count statements read **176 feature keys (134 v1.1 + 38 v2.0 + 4 PHASE-035
+  intake)** across the 22 modules, and 13/13 industry templates/add-ons are live.
+- The validator's canonical phase range is now **001–058** (**58 phase documents**
+  present — 001–034 roadmap + 035 gap-closure + 036–058 the post-roadmap expansion
+  v3.0 program, all PLANNED; PHASE-026…058 all carry the 8 canonical headings) — the
+  expansion program is registered per the MASTER_ROADMAP post-roadmap note and
+  [../planning/POST_ROADMAP_EXPANSION_REGISTER.md](../planning/POST_ROADMAP_EXPANSION_REGISTER.md).
+- Permissions drift stays **245 = 245** (zero new keys); i18n parity **ar=en=4,286**
+  (`check-i18n-parity` PASS); migrations journal **48 entries** (0047 rental template +
+  0048 platform overview definer).

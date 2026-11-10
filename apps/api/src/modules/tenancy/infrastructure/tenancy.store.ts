@@ -226,6 +226,113 @@ export async function platformGetTenant(id: string): Promise<TenantProfileRow | 
   return (rows.rows as unknown as TenantProfileRow[])[0];
 }
 
+/**
+ * PHASE-035 §3 (T35-A2): the platform control-panel dashboard's aggregates.
+ *
+ * The platform scope reads `tenants` + `audit_events` directly (their RLS
+ * policies admit the platform GUC — matrix §3.10), while the RLS-blocked
+ * slices (subscriptions / devices / e_invoicing_submissions) resolve through
+ * the sanctioned SECURITY DEFINER projection `erp.platform_console_overview()`
+ * (migration 0048 — the subscriptions_needing_attention() precedent: grouped
+ * counts only, no tenant-identifying rows cross the boundary).
+ *
+ * `recentAudit` samples the newest platform-relevant events (tenant NULL =
+ * platform rows, or via_platform_admin) for the dashboard's activity feed.
+ */
+export interface PlatformOverviewStats {
+  tenantsTotal: number;
+  tenantsByStatus: ReadonlyArray<{ status: string; count: number }>;
+  newTenants30d: number;
+  newTenants7d: number;
+  industryDistribution: ReadonlyArray<{ templateKey: string; count: number }>;
+  countryDistribution: ReadonlyArray<{ countryCode: string; count: number }>;
+  auditLast24h: number;
+  auditLast7d: number;
+  recentAudit: ReadonlyArray<{ at: string; action: string; entityType: string }>;
+  planDistribution: ReadonlyArray<{
+    planKey: string;
+    planName: string;
+    planNameAr: string;
+    count: number;
+  }>;
+  subscriptionStatuses: ReadonlyArray<{ status: string; count: number }>;
+  devices: { total: number; active: number; revoked: number };
+  einvoicingByStatus: ReadonlyArray<{ status: string; count: number }>;
+}
+
+export async function platformOverviewStats(): Promise<PlatformOverviewStats> {
+  const tx = platformTx();
+
+  const tenantsAgg = await tx.execute(sql`
+    SELECT
+      count(*)::int AS total,
+      count(*) FILTER (WHERE created_at >= now() - interval '30 days')::int AS new_30d,
+      count(*) FILTER (WHERE created_at >= now() - interval '7 days')::int AS new_7d
+    FROM tenants
+    WHERE deleted_at IS NULL
+  `);
+  const tenantsByStatus = await tx.execute(sql`
+    SELECT status, count(*)::int AS count FROM tenants
+    WHERE deleted_at IS NULL GROUP BY status ORDER BY count DESC, status ASC
+  `);
+  const industryDistribution = await tx.execute(sql`
+    SELECT industry_template_key AS "templateKey", count(*)::int AS count
+    FROM tenants
+    WHERE deleted_at IS NULL AND industry_template_key IS NOT NULL
+    GROUP BY industry_template_key ORDER BY count DESC, industry_template_key ASC
+  `);
+  const countryDistribution = await tx.execute(sql`
+    SELECT country_code AS "countryCode", count(*)::int AS count
+    FROM tenants
+    WHERE deleted_at IS NULL
+    GROUP BY country_code ORDER BY count DESC, country_code ASC LIMIT 8
+  `);
+  const auditAgg = await tx.execute(sql`
+    SELECT
+      count(*) FILTER (WHERE at >= now() - interval '24 hours')::int AS last_24h,
+      count(*) FILTER (WHERE at >= now() - interval '7 days')::int AS last_7d
+    FROM audit_events
+  `);
+  const recentAudit = await tx.execute(sql`
+    SELECT at, action, entity_type AS "entityType" FROM audit_events
+    WHERE tenant_id IS NULL OR via_platform_admin = true
+    ORDER BY at DESC LIMIT 8
+  `);
+
+  // The RLS-blocked slices through the sanctioned definer projection
+  // (grouped counts only — see migration 0048's scope contract).
+  const definer = await tx.execute(
+    sql`SELECT erp.platform_console_overview() AS overview`,
+  );
+  const overview = (definer.rows as unknown as { overview: Record<string, unknown> }[])[0]!.overview;
+
+  const planDistribution = (overview.planDistribution ?? []) as PlatformOverviewStats["planDistribution"];
+  const subscriptionStatuses = (overview.subscriptionStatuses ?? []) as PlatformOverviewStats["subscriptionStatuses"];
+  const devices = (overview.devices ?? { total: 0, active: 0, revoked: 0 }) as PlatformOverviewStats["devices"];
+  const einvoicingByStatus = (overview.einvoicingByStatus ?? []) as PlatformOverviewStats["einvoicingByStatus"];
+
+  const totals = (tenantsAgg.rows as unknown as { total: number; new_30d: number; new_7d: number }[])[0]!;
+  const auditTotals = (auditAgg.rows as unknown as { last_24h: number; last_7d: number }[])[0]!;
+
+  return {
+    tenantsTotal: totals.total,
+    tenantsByStatus: tenantsByStatus.rows as unknown as PlatformOverviewStats["tenantsByStatus"],
+    newTenants30d: totals.new_30d,
+    newTenants7d: totals.new_7d,
+    industryDistribution: industryDistribution.rows as unknown as PlatformOverviewStats["industryDistribution"],
+    countryDistribution: countryDistribution.rows as unknown as PlatformOverviewStats["countryDistribution"],
+    auditLast24h: auditTotals.last_24h,
+    auditLast7d: auditTotals.last_7d,
+    recentAudit: (recentAudit.rows as unknown as { at: string; action: string; entityType: string }[]).map(
+      (row) => ({ at: new Date(row.at).toISOString(), action: row.action, entityType: row.entityType }),
+    ),
+    planDistribution,
+    subscriptionStatuses,
+    devices,
+    einvoicingByStatus,
+  };
+}
+
 /** Own-tenant profile read inside the ambient tenant scope. */
 export async function getOwnTenant(): Promise<TenantProfileRow> {
   const tx = tenantTx();

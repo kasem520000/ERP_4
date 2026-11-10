@@ -55,6 +55,10 @@ const FALLBACK_CRUMBS: Record<string, { group?: keyof Dictionary; label: keyof D
   // fallback covers nav-fetch failure — the support-sessions rule).
   audit: { group: "navSettings", label: "auditReviewTitle" },
   platform: { group: "navPlatformSection", label: "navPlatformConsole" },
+  // PHASE-035 (T35-A3): the platform control-panel dashboard — the KPI
+  // overview ahead of the tenant list (registry row `platform.overview`
+  // drives the sidebar; this fallback covers nav-fetch failure).
+  "platform/overview": { group: "navPlatformSection", label: "navPlatformOverview" },
   "platform/audit": { group: "navPlatformSection", label: "navPlatformAudit" },
   // -- PHASE-020 (T14): the sync admin surfaces. The nav registry
   // (packages/contracts NAV_ITEMS) is frozen this phase, so these ride the

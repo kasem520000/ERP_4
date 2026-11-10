@@ -1,6 +1,6 @@
 # Subscription and Entitlements
 
-> **Status:** STABLE · **Owner:** Product & Platform Architecture · **Updated:** 2026-11-04
+> **Status:** STABLE · **Owner:** Product & Platform Architecture · **Updated:** 2026-11-10
 
 **Delivery status (PHASE-014, 2026-11-01):** the mechanics described in this file are
 **LIVE in the MVP release** — plan seeds, entitlement materialization with
@@ -75,7 +75,7 @@ Add-ons bundle a template + the feature keys that template emphasizes
 | Distribution pack | `industry.distribution` | `distribution.*` (routes, van_stock, settlements, customer_tiers, free_goods), `sales.commissions`, `inventory.batch_tracking` — **SHIPPED PHASE-017**; offline van selling (`offline.android_app`) arrives PHASE-022 |
 | Food manufacturing pack | `industry.food_manufacturing` | `manufacturing.*` (BOM, production orders, WIP, costing, scrap, batch genealogy, QC), `inventory.batch_tracking` — **SHIPPED PHASE-018**; restaurants' prep-recipe (`bom_production`) entries are live configuration for `industry.restaurant` tenants carrying this add-on |
 | Professional services pack | `industry.professional_services` | `crm.service_contracts`, `crm.recurring_billing`, `accounting.projects`, `crm.leads`, `crm.tasks_activities`, `crm.service_orders` — **SHIPPED PHASE-019** |
-| Rental / logistics pack | `industry.rental_logistics` | `crm.service_contracts`, `inventory.serial_tracking`, `crm.recurring_billing` |
+| Rental / logistics pack | `industry.rental_logistics` | `crm.rental_contracts`, `crm.contract_deposits`, `crm.late_fees`, `distribution.shipment_tracking`, `crm.service_contracts`, `crm.recurring_billing`, `inventory.serial_tracking` — **SHIPPED PHASE-035** (the §25 intake keys + the base contract chain) |
 | Wholesale pack | `industry.wholesale` | `items.price_lists` (qty-break tiers), `partners.credit_terms`, `sales.credit_limits`, `distribution.routes` (optional), `notes.received` |
 | Electronics pack | `industry.electronics` | `inventory.serial_tracking` (IMEI), `crm.service_orders` (repairs), `pos.*` set |
 | Healthcare pack | `industry.healthcare` | `inventory.batch_tracking` (pharmacy), `crm.service_orders` (visits), `notes.received` (claims cheques) |
@@ -129,8 +129,10 @@ creation blocked).
 > missing chain, and the automotive template without this add-on hides its
 > optional `service_contracts` entry cleanly (BR-038 additive-only switching
 > proven retail → professional_services over a real posted invoice). The
-> `crm.contract_deposits` / `crm.late_fees` intake pair stays deferred
-> behind the §17 decision record (RISK-019) — never silently granted.
+> `crm.contract_deposits` / `crm.late_fees` intake pair stayed deferred
+> behind the §17 decision record (RISK-019) — never silently granted (the
+> deferral is now CLOSED: PHASE-035 completed the §25 intake with migration
+> 0047's grants — see the wiring note below).
 
 > **Add-on wiring (PHASE-020, migration `0029_sync_foundation.sql`).** The offline
 > foundation lights up on **business + enterprise**: migration 0029 grants
@@ -155,6 +157,22 @@ creation blocked).
 > shipped — see the PHASE-023 completion report. The ZATCA/ETA adapter features stay
 > honestly UNVERIFIED/deferred (DR-001 OPEN option C; DR-003 draft) — no entitlement
 > can light up an unverified integration (the no-fabrication gate).
+
+> **Add-on wiring (PHASE-035, migration `0047_industry_rental_logistics.sql`).** The
+> rental / logistics pack — the last deferred add-on — is now **AVAILABLE**: migration
+> 0047 grants the four §25 intake keys (`crm.rental_contracts`, `crm.contract_deposits`,
+> `crm.late_fees`, `distribution.shipment_tracking`) to **business + enterprise**
+> (starter does NOT get them — the tier-4 posture of the 0025/0026/0027/0039/0040
+> templates; the rental REQUIRED chain classifies the template blocked-on-starter, so a
+> starter apply degrades honestly with the exact missing chain, never a silent gate).
+> `industry.rental_logistics` is seeded at v1.0.0 (byte-equal to the docs manifest and
+> the contracts constant; `validate:manifests` **13/13**) and applies through the
+> unmodified PHASE-015 engine at CURRENT_SHIPPED_PHASE 35 — the 2026-11-10 gap-closure
+> phase that closed the PHASE-019 deferral and the CAPABILITY_MATRIX §3 pending intake.
+> **All 13 industry add-ons are now live** (retail, grocery, restaurant, automotive,
+> distribution, food manufacturing, professional services, rental/logistics, wholesale,
+> electronics, healthcare, education, agriculture); the **Financial Depth Pack (§3.1) is
+> unchanged** by this phase (its 38 keys keep their 0037/0038/0041/0042/0043 grant waves).
 
 ### 3.1 Financial Depth Pack (Blueprint v2.0 — PLACEHOLDER pricing ⚠)
 

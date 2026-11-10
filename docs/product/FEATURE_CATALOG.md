@@ -1,6 +1,6 @@
 # Feature Catalog
 
-> **Status:** STABLE · **Owner:** Product & Platform Architecture · **Updated:** 2026-11-08
+> **Status:** STABLE · **Owner:** Product & Platform Architecture · **Updated:** 2026-11-10
 
 The canonical, exhaustive registry of product features. Every feature has exactly one
 **feature key** (`module.feature_name`). This file is the single source of truth referenced by:
@@ -80,7 +80,12 @@ groups a capability in a different tier (e.g., manufacturing at PHASE-018 is gro
 tier-2 capabilities in FR-MFG-001), the phase-derived priority in this catalog is
 authoritative for entitlement purposes. The **Phase** column is the first phase whose
 acceptance criteria include the feature; a phase in parentheses (e.g., `006 (draft) / 007 (post)`)
-marks a staged delivery.
+marks a staged delivery. **Post-roadmap note (PHASE-035, 2026-11-10):** the first
+post-roadmap gap-closure phase completed the CAPABILITY_MATRIX §3 pending intake —
+four keys (§13 ×3, §15 ×1) that carry the tier-4 grant posture (business +
+enterprise; starter blocked) exactly like the stage-9/10 financial-depth and
+template keys before them; the catalog total is now **176 feature keys (134 v1.1 +
+38 v2.0 + 4 PHASE-035 intake)** across the 22 modules.
 
 ## 3. Module: platform
 
@@ -263,7 +268,11 @@ Report contract, statements, printing — rendering rules in the reporting works
 
 ## 13. Module: crm
 
-Leads-to-contract pipeline and service delivery (PHASE-019; shipped 2026-11-03).
+Leads-to-contract pipeline and service delivery (PHASE-019; shipped 2026-11-03) —
+plus the rental specialization keys intake-completed by the post-roadmap PHASE-035
+gap-closure (2026-11-10: the CAPABILITY_MATRIX §3 pending set, closed with migration
+0047's plan grants so the thirteenth template `industry.rental_logistics` resolves
+LIVE).
 
 | Feature key | Name (EN · AR) | Description | Priority | Phase | Permission key | Depends on |
 |---|---|---|---|---|---|---|
@@ -272,6 +281,9 @@ Leads-to-contract pipeline and service delivery (PHASE-019; shipped 2026-11-03).
 | `crm.service_contracts` | Service contracts · عقود الخدمة | Contract terms, coverage, billing schedule linked to partners | 1 | 019 (shipped 2026-11-03) | `crm.contracts.manage` | `partners.directory` |
 | `crm.recurring_billing` | Recurring billing · الفوترة الدورية | Scheduled invoice generation from contract billing schedules; drafts → normal approval flow | 1 | 019 (shipped 2026-11-03) | `crm.contracts.bill` | `crm.service_contracts`, `sales.invoices` |
 | `crm.service_orders` | Service orders · أوامر الخدمة | Service delivery documents (job cards) with parts consumption and labor lines | 1 | 019 (shipped 2026-11-03) | `crm.service_orders.manage` | `crm.service_contracts`, `inventory.stock_ledger` |
+| `crm.rental_contracts` | Rental contracts · عقود الإيجار | **SHIPPED PHASE-035** (the §25 intake closing the PHASE-019 deferral — migration 0047 grants): rental specialization of service contracts — reservation, pickup/return events, rate tables (daily/weekly/monthly), per-asset availability over serial-tracked items | 4 | 035 (shipped 2026-11-10 — the §25 intake) | (reuses the `crm.contracts.*` set — zero new permission keys) | `crm.service_contracts` |
+| `crm.contract_deposits` | Contract deposits · تأمينات العقود | **SHIPPED PHASE-035** (same intake): contract security deposits as on-account credit items (BR-027), held/released/applied per contract terms — never revenue, never silently netted | 4 | 035 (shipped 2026-11-10 — the §25 intake) | (reuses the `crm.contracts.*` set — zero new permission keys) | `crm.service_contracts` |
+| `crm.late_fees` | Late fees · رسوم التأخير | **SHIPPED PHASE-035** (same intake): contract-term late-return/late-payment charge generation (grace-hours policy; daily-rate-based calculation) | 4 | 035 (shipped 2026-11-10 — the §25 intake) | (reuses the `crm.contracts.*` set — zero new permission keys) | `crm.service_contracts` |
 
 ## 14. Module: manufacturing
 
@@ -291,7 +303,10 @@ Production execution + costing (PHASE-018; no MRP per [OQ-006](../ASSUMPTIONS_AN
 
 Van sales and field operations (**DELIVERED PHASE-017**, migration
 `0025_automotive_distribution.sql`; online/back-office by design — offline van selling
-arrives with the Android app, PHASE-022, on the PHASE-020 sync foundation).
+arrives with the Android app, PHASE-022, on the PHASE-020 sync foundation) — plus the
+shipment-tracking key intake-completed by the post-roadmap PHASE-035 gap-closure
+(2026-11-10, migration 0047's plan grants — the `shipment_tracking` capability the
+rental/logistics template requires).
 
 | Feature key | Name (EN · AR) | Description | Priority | Phase | Permission key | Depends on |
 |---|---|---|---|---|---|---|
@@ -300,6 +315,7 @@ arrives with the Android app, PHASE-022, on the PHASE-020 sync foundation).
 | `distribution.settlements` | Rep settlements · تسويات المندوبين | Day-end settlement: cash counted vs collected, invoices/returns reconciliation, variance disposition (BR-021 family) | 1 | 017 | `distribution.settlements.manage` | `distribution.van_stock`, `sales.invoices`, `sales.receipts` |
 | `distribution.customer_tiers` | Customer tiers · فئات العملاء | Tier assignment driving price-list precedence and visit frequency | 1 | 017 | `distribution.tiers.manage` | `partners.directory` |
 | `distribution.free_goods` | Free-goods policies · سياسات السلع المجانية | Rule-based free goods (buy X get Y, per-tier) applied on van/POS sales | 1 | 017 | `distribution.free_goods.manage` | `sales.discount_management` |
+| `distribution.shipment_tracking` | Shipment tracking · تتبع الشحنات | **SHIPPED PHASE-035** (the §25 intake closing the PHASE-019 deferral — migration 0047 grants): consignment/shipment records with tracking references, manual milestone status board (booking → pickup → in transit → customs → delivered) and aging; carrier-adapter feeds remain with the PHASE-023 integrations | 4 | 035 (shipped 2026-11-10 — the §25 intake) | (reuses the `distribution.*` set — zero new permission keys) | `partners.directory`, `sales.invoices` |
 
 ## 16. Module: pos
 
@@ -359,6 +375,18 @@ plan grant, route, or permission key was added (drift stays 245=245). The six ne
 workflow-**policy** keys live in the policy registry
 ([CONFIGURATION_ENGINE.md](CONFIGURATION_ENGINE.md) §4), not here; the group_by_claim
 report parameter rides existing contracts (register §J stays closed).
+
+**Cross-check (PHASE-035, shipped 2026-11-10): FOUR intake keys — the §25 protocol's
+worked example.** The post-roadmap gap-closure phase completed the CAPABILITY_MATRIX
+§3 pending-intake set (the PHASE-019 deferral): `crm.rental_contracts`,
+`crm.contract_deposits`, `crm.late_fees`, and `distribution.shipment_tracking` are now
+full catalog rows (§13/§15) with FEATURE_DEPS edges and the migration-0047 plan grants
+(business + enterprise; starter blocked — the tier-4 posture), so the THIRTEENTH
+template `industry.rental_logistics` resolves LIVE — **13/13 templates shipped, and
+the matrix's pending set is empty**. The seven new rental workflow-**policy** keys live
+in the policy registry ([CONFIGURATION_ENGINE.md](CONFIGURATION_ENGINE.md) §4), not
+here; the template's report pins ride LIVE registry keys only (register §J stays
+closed), and zero new permission keys were added (drift stays 245=245).
 
 | Feature key | Name (EN · AR) | Description | Priority | Phase | Permission key | Depends on |
 |---|---|---|---|---|---|---|

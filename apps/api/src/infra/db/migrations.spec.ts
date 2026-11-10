@@ -87,7 +87,11 @@ describe("migration manifest (MIGRATION_STRATEGY §1)", () => {
     // registry seed with the partners.ar_aging → ar.aging pin reconciliation;
     // the six typed workflow-policy keys register in the code-owned
     // POLICY_REGISTRY — zero new schema objects, permissions, or grants).
-    expect(files.at(-1)?.tag).toBe("0046_industry_healthcare");
+    // PHASE-035: 0047_industry_rental_logistics (the THIRTEENTH template —
+    // the §3 pending-intake set completed: the grant wave + the manifest
+    // seed, configuration-only) + 0048_platform_overview (the platform
+    // dashboard's SECURITY DEFINER aggregate — the 0021 definer precedent).
+    expect(files.at(-1)?.tag).toBe("0048_platform_overview");
   });
 
   it("journal entries mirror the manifest order (drizzle-kit manifest)", () => {

@@ -1,9 +1,12 @@
 /**
- * PHASE-013 T11 · the four versioned base print templates
+ * PHASE-013 T11 · the versioned base print templates
  * (PRINTING_AND_EXPORT §1): pure HTML-string generators — the SAME payload
  * renders in the web PrintPreview (iframe srcDoc) and in the server
  * Chromium PDF (ADR-0011: screen preview = paper; no template ever
  * fetches data — data arrives as a typed payload).
+ *
+ * PHASE-035 §5 (T35-P1): the fifth base template joined — a4-payslip (the
+ * payroll run's per-employee salary slips; the PHASE-029 honest miss).
  *
  * RTL rules (binding): receipts default RTL; Western digits LTR-isolated
  * (`.num` + tabular-nums — digit order never mirrors); QR/barcode blocks
@@ -85,9 +88,47 @@ export interface ReceiptPayload {
   readonly condensed?: boolean;
 }
 
+/**
+ * PHASE-035 §5 (T35-P1) — a4-payslip: the per-employee salary slip. The
+ * payload mirrors the payroll module's payslips batch (masked per C-PII —
+ * the controller never sends unmasked national_id/bank fields): an
+ * earnings/deductions two-column component table per slip, the net + a
+ * paid line, and one page-break per employee so a run prints as a batch.
+ */
+export interface A4PayslipPayload {
+  readonly template: "a4-payslip";
+  readonly locale: "ar" | "en";
+  readonly title: BilingualText;
+  readonly runNo: string;
+  readonly periodName: string;
+  readonly branding: PrintBranding;
+  readonly slips: readonly {
+    readonly employeeName: string;
+    readonly employeeNo: string | null;
+    readonly department: string | null;
+    readonly components: readonly {
+      readonly label: BilingualText;
+      readonly kind: "EARNING" | "DEDUCTION";
+      readonly amount: string;
+    }[];
+    readonly gross: string;
+    readonly deductions: string;
+    readonly net: string;
+  }[];
+  readonly batchTotals: {
+    readonly gross: string;
+    readonly deductions: string;
+    readonly net: string;
+    readonly employees: number;
+  };
+  readonly asOf?: string;
+  readonly legalFooter?: LegalFooter;
+}
+
 export const PRINT_TEMPLATE_VERSIONS: Readonly<Record<string, number>> = Object.freeze({
   "a4-document": 1,
   "a4-report": 1,
+  "a4-payslip": 1,
   "receipt-80": 1,
   "receipt-58": 1,
 });
@@ -249,6 +290,105 @@ export function renderA4Report(payload: A4ReportPayload): string {
     `${payload.title.en}`,
     bodyHtml,
     buildPrintCss({ size: "A4", margin: "16mm 14mm 18mm 14mm" }),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// a4-payslip — the payroll run's per-employee salary slips (PHASE-035)
+// ---------------------------------------------------------------------------
+
+export function renderA4Payslip(payload: A4PayslipPayload): string {
+  const locale = payload.locale;
+  const earningsLabel: BilingualText = { ar: "المستحقات", en: "Earnings" };
+  const deductionsLabel: BilingualText = { ar: "الاستقطاعات", en: "Deductions" };
+  const grossLabel: BilingualText = { ar: "إجمالي المستحقات", en: "Gross" };
+  const totalDeductionsLabel: BilingualText = { ar: "إجمالي الاستقطاعات", en: "Total deductions" };
+  const netLabel: BilingualText = { ar: "الصافي المستحق", en: "Net pay" };
+  const employeeLabel: BilingualText = { ar: "الموظف", en: "Employee" };
+  const departmentLabel: BilingualText = { ar: "القسم", en: "Department" };
+  const employeeNoLabel: BilingualText = { ar: "الرقم الوظيفي", en: "Employee no." };
+  const periodLabel: BilingualText = { ar: "الفترة", en: "Period" };
+  const batchTotalsLabel: BilingualText = {
+    ar: "إجماليات الدفعة",
+    en: "Batch totals",
+  };
+  const employeesLabel: BilingualText = { ar: "عدد الموظفين", en: "Employees" };
+
+  const slipsHtml = payload.slips
+    .map((slip, index) => {
+      const earnings = slip.components.filter((component) => component.kind === "EARNING");
+      const deductions = slip.components.filter((component) => component.kind === "DEDUCTION");
+      const componentRow = (component: A4PayslipPayload["slips"][number]["components"][number]): string =>
+        `<tr><td>${pick(component.label, locale)}</td><td class="numeric num">${esc(component.amount)}</td></tr>`;
+      return `
+<section class="payslip${index > 0 ? " payslip-break" : ""}">
+  <div class="doc-header">
+    ${payload.branding.logoDataUri ? `<img src="${payload.branding.logoDataUri}" alt="" style="max-inline-size: 30mm;">` : ""}
+    <div class="title">${pick(payload.title, locale)}</div>
+    <div><span class="num">${esc(payload.runNo)}</span> — ${pick(periodLabel, locale)}: ${esc(payload.periodName)}</div>
+  </div>
+  <div class="parties">
+    <div class="party">
+      <h2>${pick(employeeLabel, locale)}</h2>
+      <div>${esc(slip.employeeName)}</div>
+      ${slip.employeeNo !== null ? `<div>${pick(employeeNoLabel, locale)}: <span class="num">${esc(slip.employeeNo)}</span></div>` : ""}
+      ${slip.department !== null ? `<div>${pick(departmentLabel, locale)}: ${esc(slip.department)}</div>` : ""}
+    </div>
+  </div>
+  <div class="payslip-columns">
+    <div class="payslip-column">
+      <table>
+        <thead><tr><th>${pick(earningsLabel, locale)}</th><th class="numeric">${pick(grossLabel, locale)}</th></tr></thead>
+        <tbody>${earnings.map(componentRow).join("")}</tbody>
+      </table>
+    </div>
+    <div class="payslip-column">
+      <table>
+        <thead><tr><th>${pick(deductionsLabel, locale)}</th><th class="numeric">${pick(totalDeductionsLabel, locale)}</th></tr></thead>
+        <tbody>${deductions.map(componentRow).join("")}</tbody>
+      </table>
+    </div>
+  </div>
+  <div class="totals avoid-break">
+    <table>
+      <tr><td>${pick(grossLabel, locale)}</td><td class="numeric num">${esc(slip.gross)}</td></tr>
+      <tr><td>${pick(totalDeductionsLabel, locale)}</td><td class="numeric num">${esc(slip.deductions)}</td></tr>
+      <tr class="check"><td>${pick(netLabel, locale)}</td><td class="numeric num">${esc(slip.net)}</td></tr>
+    </table>
+  </div>
+</section>`;
+    })
+    .join("");
+
+  const legal = payload.legalFooter
+    ? `<div class="legal-footer">
+<div>${esc(payload.legalFooter.legalName)}</div>
+${payload.legalFooter.vatRegNo ? `<div>الرقم الضريبي / VAT No.: <span class="num">${esc(payload.legalFooter.vatRegNo)}</span></div>` : ""}
+${payload.legalFooter.notices.map((notice) => `<div>${esc(notice)}</div>`).join("")}
+</div>`
+    : "";
+
+  const bodyHtml = `
+${slipsHtml}
+<div class="totals avoid-break payslip-break">
+  <table>
+    <tr><td>${pick(batchTotalsLabel, locale)} — ${pick(employeesLabel, locale)}: <span class="num">${payload.batchTotals.employees}</span></td><td class="numeric num">${esc(payload.batchTotals.gross)}</td></tr>
+    <tr><td>${pick(totalDeductionsLabel, locale)}</td><td class="numeric num">${esc(payload.batchTotals.deductions)}</td></tr>
+    <tr class="check"><td>${pick(netLabel, locale)}</td><td class="numeric num">${esc(payload.batchTotals.net)}</td></tr>
+  </table>
+</div>
+${legal}`;
+
+  return htmlDocument(
+    locale,
+    `${payload.title.en} ${payload.runNo}`,
+    bodyHtml,
+    `${buildPrintCss({ size: "A4", margin: "16mm 14mm 18mm 14mm" })}
+.payslip { display: block; }
+.payslip-break { break-before: page; page-break-before: always; }
+.payslip-columns { display: flex; gap: 6mm; }
+.payslip-column { flex: 1 1 0; min-width: 0; }
+.payslip-column table { width: 100%; }`,
   );
 }
 

@@ -93,10 +93,13 @@ const COLUMN_TO_TEMPLATE: Readonly<Record<string, string>> = Object.freeze({
   // carries their columns with the exact cells the shipped manifests declare.
   EDU: "industry.education",
   AGR: "industry.agriculture",
+  // PHASE-035: the rental/logistics shell shipped (the thirteenth — the
+  // §3 pending-intake set completed) and joins the strict set below.
+  RNT: "industry.rental_logistics",
 });
 
-/** The columns whose reconciliation is STRICT both directions (030+/the restoration). */
-const STRICT_COLUMNS: readonly string[] = ["WHL", "ELC", "HLT", "EDU", "AGR"];
+/** The columns whose reconciliation is STRICT both directions (030+/the restoration/PHASE-035). */
+const STRICT_COLUMNS: readonly string[] = ["WHL", "ELC", "HLT", "EDU", "AGR", "RNT"];
 
 /**
  * The frozen pre-existing planned-vs-shipped delta (part (b)): cells the
@@ -199,12 +202,12 @@ describe("capability-matrix reconciliation (register §L; CAPABILITY_MATRIX §1)
     expect(matrix.rows.size).toBeGreaterThanOrEqual(25);
   });
 
-  it("every shipped template has a matrix column mapping (the 12 shipped × 12 mapped)", () => {
+  it("every shipped template has a matrix column mapping (the 13 shipped × 13 mapped)", () => {
     const mapped = new Set(Object.values(COLUMN_TO_TEMPLATE));
     for (const manifest of SHIPPED_TEMPLATE_MANIFESTS) {
       expect(mapped.has(manifest.id), manifest.id).toBe(true);
     }
-    expect(SHIPPED_TEMPLATE_MANIFESTS).toHaveLength(12);
+    expect(SHIPPED_TEMPLATE_MANIFESTS).toHaveLength(13);
   });
 
   it("WHL + ELC + HLT + EDU + AGR reconcile STRICTLY — zero mismatches, both directions (the 030/031 gates + the restoration merge's 032/033 shells)", () => {
@@ -319,17 +322,17 @@ describe("capability-matrix reconciliation (register §L; CAPABILITY_MATRIX §1)
     ).toEqual({ grew: [], shrank: [] });
   });
 
-  it("the one v2.0-only column left (RNT) stays unmapped until its shell ships; EDU/AGR mapped at the restoration (no premature reconciliation)", () => {
-    // The rental/logistics template is NOT in SHIPPED_TEMPLATE_MANIFESTS —
-    // its column exists in the matrix but maps to nothing yet. Education
-    // (032) and agriculture (033) shipped on the surviving lineage and were
-    // mapped by the restoration merge — their strict reconciliation is the
-    // test above, and both shells being live is asserted here.
-    expect(COLUMN_TO_TEMPLATE["RNT"]).toBeUndefined();
+  it("the one v2.0-only column left (RNT) shipped with PHASE-035 — the thirteenth template, mapped and strict; EDU/AGR mapped at the restoration (no premature reconciliation)", () => {
+    // The rental/logistics template IS in SHIPPED_TEMPLATE_MANIFESTS since
+    // PHASE-035 (the §3 pending-intake set completed) — its column maps and
+    // reconciles strictly in the test above. Education (032) and agriculture
+    // (033) shipped on the surviving lineage and were mapped by the
+    // restoration merge; both shells being live is asserted here.
+    expect(COLUMN_TO_TEMPLATE["RNT"]).toBe("industry.rental_logistics");
     expect(COLUMN_TO_TEMPLATE["EDU"]).toBe("industry.education");
     expect(COLUMN_TO_TEMPLATE["AGR"]).toBe("industry.agriculture");
     const shippedIds = new Set(SHIPPED_TEMPLATE_MANIFESTS.map((manifest) => manifest.id));
-    expect(shippedIds.has("industry.rental_logistics")).toBe(false);
+    expect(shippedIds.has("industry.rental_logistics")).toBe(true);
     expect(shippedIds.has("industry.education")).toBe(true);
     expect(shippedIds.has("industry.agriculture")).toBe(true);
   });

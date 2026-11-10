@@ -9,6 +9,7 @@ import {
   GROCERY_MANIFEST,
   HEALTHCARE_TEMPLATE_MANIFEST,
   PROFESSIONAL_SERVICES_TEMPLATE_MANIFEST,
+  RENTAL_LOGISTICS_TEMPLATE_MANIFEST,
   RESTAURANT_MANIFEST,
   RETAIL_MANIFEST,
   WHOLESALE_TEMPLATE_MANIFEST,
@@ -47,9 +48,9 @@ describe("phase gate helpers", () => {
     expect(() => phaseNumber("PHASE-16")).toThrow();
   });
 
-  it("CURRENT_SHIPPED_PHASE is PHASE-034 (the restoration merge completed the 34-phase roadmap — 001–034 all live in this single build)", () => {
-    expect(CURRENT_SHIPPED_PHASE).toBe("PHASE-034");
-    expect(phaseNumber(CURRENT_SHIPPED_PHASE)).toBe(34);
+  it("CURRENT_SHIPPED_PHASE is PHASE-035 (the gap-closure phase: the marketing landing + platform dashboard + payslip print + the THIRTEENTH template — the §3 pending-intake set completed)", () => {
+    expect(CURRENT_SHIPPED_PHASE).toBe("PHASE-035");
+    expect(phaseNumber(CURRENT_SHIPPED_PHASE)).toBe(35);
     // THE RESTORATION NOTE: the stage-9/10 siblings 028–031 (budgeting /
     // payroll / wholesale+electronics / healthcare) were lost to
     // environment resets on the surviving lineage — which honestly kept
@@ -57,11 +58,13 @@ describe("phase gate helpers", () => {
     // 034 consolidation on top — and were RESTORED from the uploaded
     // PHASE-031 archive and merged onto PHASE-034 (migrations renumbered
     // 0042–0046, modules/templates/docs united). With 001–034 all
-    // implemented in THIS build, the gate takes the roadmap's end: no
-    // shipped manifest carries a capability past PHASE-034 (agriculture's
-    // crop_cycle_costing @ 033 is the highest), so nothing phase-gates any
-    // more — the §4 mechanism itself stays proven by the synthetic
-    // post-roadmap PHASE-035 fixtures below.
+    // implemented in THIS build, the gate took the roadmap's end.
+    // THE GAP-CLOSURE NOTE (PHASE-035): the rental/logistics intake
+    // completed the CAPABILITY_MATRIX §3 pending set — the four keys are
+    // full FEATURE_DEPS rows with the 0047 business+enterprise grants, and
+    // the thirteenth template's highest gate is its own intake phase — so
+    // nothing phase-gates any more; the §4 mechanism itself stays proven
+    // by the synthetic post-roadmap PHASE-036 fixtures below.
   });
 });
 
@@ -196,23 +199,20 @@ describe("capability classification (industries/README §4)", () => {
     // An OPTIONAL capability whose roadmap phase has not shipped labels
     // coming-soon instead — hidden vs phase_gated is exactly the §4 optional
     // split. No shipped manifest carries an OPTIONAL capability past
-    // PHASE-034 any more (the restoration merge completed the roadmap: the
-    // 0027/0029 grants put the crm + offline sets on business, the
-    // 0042/0043 budgeting/payroll keys granted, and the 030–033
-    // wholesale/electronics/healthcare/education/agriculture chains all
-    // cite ≤034 phases), so the later-phase example is a synthetic OPTIONAL
-    // PHASE-035 entry (the post-roadmap maintenance-era intake horizon, §17
-    // — crm.rental_contracts is not yet a catalog key).
+    // PHASE-035 any more (the rental intake completed the §3 pending set),
+    // so the later-phase example is a synthetic OPTIONAL PHASE-036 entry
+    // (the post-roadmap maintenance-era intake horizon, §17 — keyed on
+    // platform.payouts, the operator-only key no plan ever carries).
     const autoWithLater = JSON.parse(JSON.stringify(AUTOMOTIVE_TEMPLATE_MANIFEST)) as typeof AUTOMOTIVE_TEMPLATE_MANIFEST;
     autoWithLater.capability_prerequisites.rental_logistics = {
       level: "OPTIONAL",
-      feature_keys: ["crm.rental_contracts"],
-      available_from_phase: "PHASE-035",
+      feature_keys: ["platform.payouts"],
+      available_from_phase: "PHASE-036",
     };
     const laterCheck = checkPrerequisites(autoWithLater, keys);
     expect(stateOf(laterCheck, "rental_logistics")).toMatchObject({
       status: "phase_gated",
-      phase: "PHASE-035",
+      phase: "PHASE-036",
     });
     // Retail's free_goods_promo (PHASE-017 keys) is now included on the
     // post-0025 business set — the gate lifted with the phase bump.
@@ -233,32 +233,30 @@ describe("capability classification (industries/README §4)", () => {
   });
 
   it("a REQUIRED capability beyond the shipped phase still phase-gates (the mechanism outlives the roadmap completion)", () => {
-    // No shipped template carries a REQUIRED capability past PHASE-034 any
-    // more (the restoration merge completed the 34-phase roadmap — the
-    // highest manifest gate is agriculture's crop_cycle_costing @ 033), so
-    // prove the §4 mechanism on a synthetic manifest: a REQUIRED
-    // PHASE-035 capability whose key is off-plan ⇒ phase_gated +
-    // requiresAcknowledgement — the switch flow's acknowledgement contract
-    // (TemplateSwitchAcknowledgementRequiredError) keys off exactly this
-    // flag. (A PHASE-028/032 synthetic no longer works: those phases
-    // shipped — 028–031 with the restoration, 032/033 with the education
-    // and agriculture shells — and no template requires a post-034 key, so
-    // such a capability classifies on its keys alone, not gated. §18
-    // lesson 5's pattern keeps the proof on a FUTURE phase key —
-    // crm.rental_contracts @PHASE-035, the post-roadmap maintenance-era
-    // intake horizon, not yet a catalog key.)
+    // No shipped template carries a REQUIRED capability past PHASE-035 any
+    // more (the rental intake completed the §3 pending set — its own
+    // highest gate is the intake phase itself), so prove the §4 mechanism
+    // on a synthetic manifest: a REQUIRED PHASE-036 capability whose key is
+    // off-plan ⇒ phase_gated + requiresAcknowledgement — the switch flow's
+    // acknowledgement contract (TemplateSwitchAcknowledgementRequiredError)
+    // keys off exactly this flag. (A PHASE-028/032/035 synthetic no longer
+    // works: those phases shipped — 028–031 with the restoration, 032/033
+    // with the education and agriculture shells, 035 with the rental
+    // intake — and no template requires a post-035 key. §18 lesson 5's
+    // pattern keeps the proof on a FUTURE phase key — platform.payouts
+    // @PHASE-036, the operator-only key no plan ever carries.)
     const synthetic = JSON.parse(JSON.stringify(GROCERY_MANIFEST)) as typeof GROCERY_MANIFEST;
     synthetic.capability_prerequisites.rental_logistics = {
       level: "REQUIRED",
-      feature_keys: ["crm.rental_contracts"],
-      available_from_phase: "PHASE-035",
+      feature_keys: ["platform.payouts"],
+      available_from_phase: "PHASE-036",
     };
     const check = checkPrerequisites(synthetic, business());
     expect(check.status).toBe("ok"); // phase-gated keys are satisfied-but-labeled
     expect(stateOf(check, "rental_logistics")).toMatchObject({
       status: "phase_gated",
-      phase: "PHASE-035",
-      missingKeys: ["crm.rental_contracts"],
+      phase: "PHASE-036",
+      missingKeys: ["platform.payouts"],
     });
     expect(check.requiresAcknowledgement).toBe(true);
   });
@@ -272,12 +270,11 @@ describe("capability classification (industries/README §4)", () => {
       expect(stateOf(check, capabilityId), capabilityId).toMatchObject({ status: "included" });
     }
     // The deposits_late_fees entry (OPTIONAL, crm.contract_deposits +
-    // crm.late_fees — the §17 pending-intake set) degrades HIDDEN on the
-    // shipped phase 19 (an ungrantable key on a shipped capability is an
-    // upgrade path, never a coming-soon label).
+    // crm.late_fees — the §17 pending-intake set until PHASE-035)
+    // resolved INCLUDED with the 0047 intake grants (the §3 pending set
+    // completed — the rental template's own REQUIRED pair).
     expect(stateOf(check, "deposits_late_fees")).toMatchObject({
-      status: "hidden",
-      missingKeys: ["crm.contract_deposits", "crm.late_fees"],
+      status: "included",
     });
     expect(check.requiresAcknowledgement).toBe(false);
   });
@@ -299,9 +296,10 @@ describe("capability classification (industries/README §4)", () => {
     // The OPTIONAL set: pdc_notes rides the 0038 notes.received grant
     // (INCLUDED — parents paying by post-dated cheques), customer_price_tiers
     // rides the 0025 grants, cashier_shifts the 016 intake; the two §17
-    // pending-intake keys (crm.contract_deposits + crm.late_fees) degrade
-    // HIDDEN exactly like professional_services — an upgrade path, never a
-    // coming-soon label (governance #7's degrade-cleanly posture).
+    // pending-intake keys (crm.contract_deposits + crm.late_fees) resolved
+    // INCLUDED with the PHASE-035 0047 intake grants (the §3 pending set
+    // completed — governance #7's degrade-cleanly posture held until the
+    // keys existed, then they upgraded in place).
     expect(stateOf(check, "pdc_notes")).toMatchObject({
       status: "included",
       featureKeys: ["notes.received"],
@@ -310,8 +308,7 @@ describe("capability classification (industries/README §4)", () => {
     expect(stateOf(check, "customer_price_tiers")).toMatchObject({ status: "included" });
     expect(stateOf(check, "cashier_shifts")).toMatchObject({ status: "included" });
     expect(stateOf(check, "deposits_late_fees")).toMatchObject({
-      status: "hidden",
-      missingKeys: ["crm.contract_deposits", "crm.late_fees"],
+      status: "included",
     });
     expect(check.requiresAcknowledgement).toBe(false);
   });
@@ -360,12 +357,11 @@ describe("capability classification (industries/README §4)", () => {
     // The OPTIONAL set: livestock serials ride the 0008 base grant, the
     // genealogy/QC keys the 0026 grants, the tier/commission keys the 0025
     // grants, landed_costs the 0008 base, pdc_notes the 0038 grants, and
-    // cashier_shifts the 016 intake — all INCLUDED. The one exception is
-    // shipment_tracking: distribution.shipment_tracking is NOT a
-    // plan-granted key (the §17 pending-intake posture — exactly like
-    // professional_services' deposits_late_fees pair), so the entry
-    // degrades HIDDEN — an upgrade path, never a coming-soon label
-    // (governance #7's degrade-cleanly posture).
+    // cashier_shifts the 016 intake — all INCLUDED. The one exception WAS
+    // shipment_tracking (distribution.shipment_tracking, the §17
+    // pending-intake posture); the PHASE-035 0047 intake grants completed
+    // the catalog intake, so the entry upgrades to INCLUDED in place —
+    // governance #7's posture held until the key existed, then it upgraded.
     expect(stateOf(check, "batch_genealogy")).toMatchObject({ status: "included" });
     expect(stateOf(check, "qc_inspections")).toMatchObject({ status: "included" });
     expect(stateOf(check, "customer_price_tiers")).toMatchObject({ status: "included" });
@@ -377,8 +373,8 @@ describe("capability classification (industries/README §4)", () => {
     });
     expect(stateOf(check, "cashier_shifts")).toMatchObject({ status: "included" });
     expect(stateOf(check, "shipment_tracking")).toMatchObject({
-      status: "hidden",
-      missingKeys: ["distribution.shipment_tracking"],
+      status: "included",
+      featureKeys: ["distribution.shipment_tracking"],
     });
     expect(check.requiresAcknowledgement).toBe(false);
   });
@@ -565,14 +561,13 @@ describe("capability classification (industries/README §4)", () => {
     ]) {
       expect(stateOf(check, capabilityId), capabilityId).toMatchObject({ status: "included" });
     }
-    // shipment_tracking (distribution.shipment_tracking, the PHASE-019
-    // rental-logistics intake horizon) is an ungrantable key on a SHIPPED
-    // capability (its available_from_phase 019 ≤ 030, but no plan carries
-    // the key) — the §18 lesson 5 posture: HIDDEN with the upgrade path,
-    // never a coming-soon label.
+    // shipment_tracking (distribution.shipment_tracking, the §17 pending
+    // key until PHASE-035) resolved INCLUDED with the 0047 intake grants —
+    // the §18 lesson 5 posture held until the catalog intake completed, then
+    // the entry upgraded in place.
     expect(stateOf(check, "shipment_tracking")).toMatchObject({
-      status: "hidden",
-      missingKeys: ["distribution.shipment_tracking"],
+      status: "included",
+      featureKeys: ["distribution.shipment_tracking"],
     });
   });
 
@@ -725,6 +720,80 @@ describe("capability classification (industries/README §4)", () => {
       missingKeys: expect.arrayContaining(["notes.received"]),
     });
   });
+
+  it("rental_logistics × business: the full rental set is INCLUDED — the thirteenth template LIVE on the 0047 intake grants (PHASE-035)", () => {
+    const check = checkPrerequisites(RENTAL_LOGISTICS_TEMPLATE_MANIFEST, business());
+    expect(check.status).toBe("ok");
+    expect(check.missingChain).toEqual([]);
+    expect(check.closureViolations).toEqual([]);
+    expect(check.requiresAcknowledgement).toBe(false);
+    // The six REQUIRED capabilities: rental_contracts + deposits_late_fees +
+    // shipment_tracking (the PHASE-035 intake set — LIVE on its own release
+    // day exactly like healthcare's insurance_claim_billing before it),
+    // service_contracts + recurring_billing (0027 grants), and
+    // field_collections (treasury.receipts_disbursements, the starter base).
+    for (const capabilityId of [
+      "rental_contracts",
+      "deposits_late_fees",
+      "shipment_tracking",
+      "service_contracts",
+      "recurring_billing",
+      "field_collections",
+    ]) {
+      expect(stateOf(check, capabilityId), capabilityId).toMatchObject({ status: "included" });
+    }
+    // The OPTIONAL counter/route surface rides the granted keys (job
+    // cards by 0025, tiers by 0025, commissions by 0025, routes by 0025,
+    // POS by 0024, shifts by base, pdc_notes by 0038, installments by 0038).
+    for (const capabilityId of [
+      "job_cards",
+      "customer_price_tiers",
+      "commissions",
+      "route_planning",
+      "barcode_pos",
+      "cashier_shifts",
+      "pdc_notes",
+      "installment_terms",
+    ]) {
+      expect(stateOf(check, capabilityId), capabilityId).toMatchObject({ status: "included" });
+    }
+  });
+
+  it("rental_logistics × starter: blocked with the exact intake chain in the guided plan selection (tier-4 posture)", () => {
+    const check = checkPrerequisites(RENTAL_LOGISTICS_TEMPLATE_MANIFEST, [...PLAN_KEYS.starter]);
+    expect(check.status).toBe("blocked");
+    // Starter carries the field_collections base but NOT the engine key,
+    // the crm contracts family (0027), the serial tracking (0008-base
+    // business tier), or the four 0047 intake keys — the exact uncovered
+    // chain names them all (none phase-gated: every phase shipped).
+    expect(check.missingChain).toContain("industry.template_engine");
+    expect(check.missingChain).toContain("crm.service_contracts");
+    expect(check.missingChain).toContain("crm.rental_contracts");
+    expect(check.missingChain).toContain("crm.contract_deposits");
+    expect(check.missingChain).toContain("crm.late_fees");
+    expect(check.missingChain).toContain("crm.recurring_billing");
+    expect(check.missingChain).toContain("distribution.shipment_tracking");
+    expect(check.missingChain).toContain("inventory.serial_tracking");
+    expect(stateOf(check, "rental_contracts")).toMatchObject({ status: "blocked" });
+    expect(stateOf(check, "deposits_late_fees")).toMatchObject({ status: "blocked" });
+    expect(stateOf(check, "shipment_tracking")).toMatchObject({ status: "blocked" });
+    // Bilingual guidance names the chain (never silent degradation).
+    expect(check.guidance?.ar).toContain("crm.rental_contracts");
+    expect(check.guidance?.en).toContain("crm.rental_contracts");
+  });
+
+  it("rental_logistics without crm.rental_contracts (downgraded plan): blocked with the rental capability naming its exact key", () => {
+    const keys = business().filter((key) => key !== "crm.rental_contracts");
+    const check = checkPrerequisites(RENTAL_LOGISTICS_TEMPLATE_MANIFEST, keys);
+    expect(check.status).toBe("blocked");
+    expect(check.missingChain).toContain("crm.rental_contracts");
+    // crm.rental_contracts is BOTH a required_feature_key and the
+    // rental_contracts capability's key — the chain names it once, honestly.
+    expect(stateOf(check, "rental_contracts")).toMatchObject({
+      status: "blocked",
+      missingKeys: ["crm.rental_contracts"],
+    });
+  });
 });
 
 describe("BR-040 dependency closure over required_feature_keys (§7)", () => {
@@ -753,8 +822,9 @@ describe("BR-040 dependency closure over required_feature_keys (§7)", () => {
       EDUCATION_TEMPLATE_MANIFEST,
       // PHASE-033: the agriculture closure — enterprise carries the
       // manufacturing (0026) + projects/cost-centers (0027/0008) + batch
-      // (0008) chains; shipment_tracking stays HIDDEN (ungranted §17
-      // pending-intake key — an OPTIONAL upgrade path, never a block).
+      // (0008) chains; shipment_tracking upgraded to INCLUDED with the
+      // PHASE-035 intake grants (it held the §17 pending posture until
+      // the catalog intake completed).
       AGRICULTURE_TEMPLATE_MANIFEST,
       // PHASE-030/031 (restored lineage): the wholesale/electronics/
       // healthcare closures — enterprise carries the notes (0038) + pos
@@ -762,6 +832,10 @@ describe("BR-040 dependency closure over required_feature_keys (§7)", () => {
       WHOLESALE_TEMPLATE_MANIFEST,
       ELECTRONICS_TEMPLATE_MANIFEST,
       HEALTHCARE_TEMPLATE_MANIFEST,
+      // PHASE-035: the rental_logistics closure — enterprise carries the
+      // crm contracts family (0027) + serial tracking (0008) + the four
+      // 0047 intake keys.
+      RENTAL_LOGISTICS_TEMPLATE_MANIFEST,
     ]) {
       const check = checkPrerequisites(manifest, enterprise());
       expect(check.status, manifest.id).toBe("ok");

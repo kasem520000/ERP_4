@@ -5,10 +5,12 @@ import {
   PRINT_TEMPLATE_VERSIONS,
   renderA4Document,
   renderA4Report,
+  renderA4Payslip,
   renderReceipt58,
   renderReceipt80,
   EMBEDDED_FONTS,
   type A4DocumentPayload,
+  type A4PayslipPayload,
   type A4ReportPayload,
   type ReceiptPayload,
 } from "@erp/ui/print";
@@ -160,10 +162,84 @@ describe("receipt-58 / receipt-80 (POS roll prints, §1)", () => {
   });
 });
 
+describe("a4-payslip (the payroll run's salary slips — PHASE-035 §5)", () => {
+  const payslipPayload = (locale: "ar" | "en"): A4PayslipPayload => ({
+    template: "a4-payslip",
+    locale,
+    title: { ar: "قسيمة رواتب", en: "Payslip" },
+    runNo: "PAY-2026-000001",
+    periodName: "2026-10",
+    branding: { tenantName: "شركة الاختبار" },
+    slips: [
+      {
+        employeeName: "سالم العتيبي",
+        employeeNo: "EMP-0014",
+        department: null,
+        components: [
+          { label: { ar: "الراتب الأساسي", en: "Basic salary" }, kind: "EARNING", amount: "8000.0000" },
+          { label: { ar: "بدل سكن", en: "Housing allowance" }, kind: "EARNING", amount: "2000.0000" },
+          { label: { ar: "استقطاع تأمينات", en: "GOSI deduction" }, kind: "DEDUCTION", amount: "920.0000" },
+        ],
+        gross: "10000.0000",
+        deductions: "920.0000",
+        net: "9080.0000",
+      },
+      {
+        employeeName: "Maryam Ahmed",
+        employeeNo: "EMP-0021",
+        department: null,
+        components: [
+          { label: { ar: "الراتب الأساسي", en: "Basic salary" }, kind: "EARNING", amount: "6500.0000" },
+        ],
+        gross: "6500.0000",
+        deductions: "0.0000",
+        net: "6500.0000",
+      },
+    ],
+    batchTotals: { gross: "16500.0000", deductions: "920.0000", net: "15580.0000", employees: 2 },
+  });
+
+  it("locale ar renders RTL with per-employee pages and the net as the check row", () => {
+    const html = renderA4Payslip(payslipPayload("ar"));
+    expect(html).toContain('lang="ar"');
+    expect(html).toContain('dir="rtl"');
+    expect(html).toContain("قسيمة رواتب");
+    expect(html).toContain("سالم العتيبي");
+    expect(html).toContain("الصافي المستحق");
+    expect(html).toContain("9080.0000");
+    // One page-break per additional employee (the second slip) + the batch
+    // totals page — the payslip-break token appears three times: the second
+    // slip's section, the batch-totals block, and the stylesheet rule.
+    expect(html.match(/payslip-break/g)).toHaveLength(3);
+    expect(html).toContain("إجماليات الدفعة");
+    expect(html).toContain("15580.0000");
+  });
+
+  it("locale en renders LTR with the EN labels", () => {
+    const html = renderA4Payslip(payslipPayload("en"));
+    expect(html).toContain('lang="en"');
+    expect(html).toContain('dir="ltr"');
+    expect(html).toContain("Payslip");
+    expect(html).toContain("Net pay");
+    expect(html).toContain("Batch totals");
+    expect(html).toContain("Housing allowance");
+  });
+
+  it("the earnings and deductions columns split by component kind", () => {
+    const html = renderA4Payslip(payslipPayload("ar"));
+    expect(html).toContain("المستحقات");
+    expect(html).toContain("الاستقطاعات");
+    expect(html).toContain("استقطاع تأمينات");
+    // tabular-nums money cells (the .num isolation rule).
+    expect(html).toContain('class="numeric num"');
+  });
+});
+
 describe("template registry + fonts (§1–§2)", () => {
-  it("PRINT_TEMPLATE_VERSIONS freezes the four base templates at version 1", () => {
+  it("PRINT_TEMPLATE_VERSIONS freezes the five base templates at version 1", () => {
     expect(Object.keys(PRINT_TEMPLATE_VERSIONS).sort()).toEqual([
       "a4-document",
+      "a4-payslip",
       "a4-report",
       "receipt-58",
       "receipt-80",

@@ -1,14 +1,15 @@
 # Shared Capability Matrix
 
-> **Status:** STABLE · **Owner:** Industry Solutions Architecture · **Updated:** 2026-11-02
+> **Status:** STABLE · **Owner:** Industry Solutions Architecture · **Updated:** 2026-11-10
 
 The catalog of reusable capabilities every industry composes from. A **capability** is a
 named, testable bundle of behavior provided by feature(s) of one or more modules
 ([../../architecture/MODULE_BOUNDARIES.md](../../architecture/MODULE_BOUNDARIES.md)).
 Templates reference these ids in `capability_prerequisites`
 ([../README.md](../README.md) §3); they never redefine them. **Feature keys cite the canonical
-registry** [../../product/FEATURE_CATALOG.md](../../product/FEATURE_CATALOG.md) — with one
-small declared exception set pending catalog intake (see §3).
+registry** [../../product/FEATURE_CATALOG.md](../../product/FEATURE_CATALOG.md) — the
+historical pending-intake exception set was completed by PHASE-035 (2026-11-10), so
+**every matrix key is now a catalog key** (see §3).
 
 **Legend:** **REQ** = included as REQUIRED by the template · **OPT** = offered as OPTIONAL ·
 **N/A** = not applicable. Industry columns: RET retail · GRO grocery/supermarket ·
@@ -338,10 +339,11 @@ history. Assets are serial-tracked items.
 
 - **Providing modules:** `crm` (contract specialization over `crm.service_contracts`);
   `items`/`inventory` (asset = serial item); `reporting` (utilization).
-- **Feature key:** `crm.rental_contracts` (proposed key — see §3; the industry catalog
+- **Feature key:** `crm.rental_contracts` (a canonical registry key since the PHASE-035
+  §25 intake — migration 0047 grants it on business + enterprise; the industry catalog
   models rental terms as a `crm.service_contracts` specialization, which is exactly the
   extension mechanism this key names).
-- **Phase:** PHASE-019.
+- **Phase:** PHASE-035 (the PHASE-019 deferral closed).
 - **Extension rules:** Extends `service_contracts`; the asset never leaves inventory
   valuation while on rent (it stays in stock, flagged as "out on rent" — no COGS at
   pickup). Damage/late charges are invoiced lines whose tax treatment resolves through the
@@ -352,8 +354,9 @@ applied) and late-return/late-payment fee charge lines generated from contract t
 
 - **Providing modules:** `crm` (deposit terms, fee generation); `treasury` (money movement);
   `partners`/`sales` (on-account open items and allocation, BR-027).
-- **Feature keys:** `crm.contract_deposits`, `crm.late_fees` (proposed keys — see §3).
-- **Phase:** PHASE-019.
+- **Feature keys:** `crm.contract_deposits`, `crm.late_fees` (canonical registry keys
+  since the PHASE-035 §25 intake).
+- **Phase:** PHASE-035 (the PHASE-019 deferral closed).
 - **Extension rules:** A deposit is received as an **on-account amount** (BR-027): an
   explicit, allocatable credit open item on the partner subledger — never revenue, never
   silently netted. When the template's `deposits_distinct_liability` policy is ON (rental
@@ -370,8 +373,10 @@ status board (booking → pickup → in transit → customs → delivered), and 
 milestones first, carrier-adapter feeds with PHASE-023 integrations.
 
 - **Providing modules:** `distribution` (shipment entity + milestones); adapters (PHASE-023).
-- **Feature key:** `distribution.shipment_tracking` (proposed key — see §3).
-- **Phase:** PHASE-019 (manual milestones); PHASE-023 (carrier/shipping adapters).
+- **Feature key:** `distribution.shipment_tracking` (a canonical registry key since the
+  PHASE-035 §25 intake).
+- **Phase:** PHASE-035 (manual milestones — the PHASE-019 deferral closed); carrier
+  feeds remain with the PHASE-023 adapters.
 - **Extension rules:** Status tracking only; freight revenue is billed via ordinary service
   invoices (per shipment or per contract). No tracking-number-based legal claims — printed
   waybills follow jurisdiction pack rules where applicable.
@@ -457,30 +462,32 @@ expiry write-off reuse `expiry_tracking_fefo` unchanged.
 
 ## 3. Catalog alignment — keys pending FEATURE_CATALOG intake
 
-Every feature key used in template manifests resolves in the canonical registry
-([../../product/FEATURE_CATALOG.md](../../product/FEATURE_CATALOG.md)) **except** the
-keys below, which the industry templates require and this matrix proposes through the
-catalog's §5 maintenance protocol (definitions below are the proposing source of truth;
-no entitlement is grantable until the catalog row exists — until then the owning template
-capability is phase-gated/optional and degrades per [../README.md](../README.md) §5 R10).
+**The pending set is now empty — every matrix key is a catalog key.** The four keys
+below were the last entries; they completed the §25 intake with **PHASE-035
+(2026-11-10) + migration `0047_industry_rental_logistics.sql`'s plan grants**
+(business + enterprise; starter blocked — the tier-4 posture), which is what lets the
+thirteenth template `industry.rental_logistics` resolve LIVE. Until that intake, no
+entitlement was grantable for them and the owning template capability degraded per
+[../README.md](../README.md) §5 R10 — the historical state this section recorded.
 
 > **v2.0 note:** the stage-9 module keys (`notes.*`, `installments.*`, `fixed_assets.*`,
 > `budgeting.*`, `payroll.*`, `consolidation.*`) are canonical registry keys per
-> [../../EXPANSION_REGISTER.md](../../EXPANSION_REGISTER.md) §D and enter the catalog
-> through the same §5 intake — they are **not** part of the pending set above and are
+> [../../EXPANSION_REGISTER.md](../../EXPANSION_REGISTER.md) §D and entered the catalog
+> through the same §5 intake — they were never part of the pending set and are
 > phase-gated (PHASE-026…034) rather than degraded.
 
-| Proposed key | Capability | Definition (one line) | Target phase |
-|---|---|---|---|
-| `crm.rental_contracts` | `rental_contracts` | Rental specialization of service contracts: reservation, pickup/return, rate tables, availability | **deferred** (PHASE-019 shipped without it — decision record in [../../implementation/phases/reports/PHASE-019-COMPLETION.md](../../implementation/phases/reports/PHASE-019-COMPLETION.md); the base `service_contracts` capability is live) |
-| `crm.contract_deposits` | `deposits_late_fees` | Contract security deposits as on-account credit items (BR-027), optionally posted to `DEPOSITS_RECEIVED` | **deferred** (same decision record — advances use the plain on-account + DEFERRED_REVENUE reclass path; the DEPOSITS_RECEIVED liability split is NOT implemented) |
-| `crm.late_fees` | `deposits_late_fees` | Contract-term late-return/late-payment charge generation | **deferred** (same decision record) |
-| `distribution.shipment_tracking` | `shipment_tracking` | Shipment/consignment records with milestone status and aging | **deferred** (same decision record; manual milestones re-targeted with the PHASE-023 adapters) |
-
 > **Intake completions:** `pos.table_service` + `pos.kitchen_display` (PHASE-016) and
-> `sales.job_cards` (PHASE-017) were proposed here and have since completed the §5
-> intake — they are full FEATURE_CATALOG rows with plan grants and permission seeds
-> (rows removed from the pending set; `sales.job_cards` via migration 0025).
+> `sales.job_cards` (PHASE-017) were proposed here and completed the §5
+> intake earlier — full FEATURE_CATALOG rows with plan grants and permission seeds
+> (rows removed from the pending set; `sales.job_cards` via migration 0025). **The
+> final four — `crm.rental_contracts` (`rental_contracts`), `crm.contract_deposits` +
+> `crm.late_fees` (`deposits_late_fees`), and `distribution.shipment_tracking`
+> (`shipment_tracking`) — completed the §25 intake with PHASE-035 + migration 0047**
+> (full catalog rows in
+> [../../product/FEATURE_CATALOG.md](../../product/FEATURE_CATALOG.md) §13/§15 with
+> FEATURE_DEPS edges; the definitions in §2 above were the proposing source of truth).
+> With those rows landed, the pending table is retired: there is nothing left to
+> propose.
 
 ## 4. How to extend this matrix
 

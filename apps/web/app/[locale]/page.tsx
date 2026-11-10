@@ -1,7 +1,10 @@
 /**
  * Landing dashboard (replaces the PHASE-001 demo). No session cookie →
- * login. With a session: current user, active tenant + switcher, granted
- * permission count and links to the PHASE-003/004 admin screens.
+ * the PUBLIC MARKETING LANDING (PHASE-035 §2: /{locale}/welcome — the
+ * discoverable front door with pricing, the activity catalog and the
+ * register CTA; login stays one tap away from its header). With a session:
+ * current user, active tenant + switcher, granted permission count and
+ * links to the PHASE-003/004 admin screens.
  */
 import { notFound, redirect } from "next/navigation";
 import type { JSX } from "react";
@@ -45,7 +48,9 @@ export default async function HomePage({
 
   const token = await getSessionToken();
   if (token === undefined) {
-    redirect(`/${locale}/login`);
+    // PHASE-035 §2: anonymous visitors land on the marketing page, not the
+    // login form — the front-door rule (USER_JOURNEYS §A0 discover → signup).
+    redirect(`/${locale}/welcome`);
   }
 
   const current = await fetchApi<CurrentSession>("identity/sessions/current");

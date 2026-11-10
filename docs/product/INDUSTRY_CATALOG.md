@@ -1,6 +1,6 @@
 # Industry Catalog
 
-> **Status:** STABLE · **Owner:** Product & Platform Architecture · **Updated:** 2026-11-08
+> **Status:** STABLE · **Owner:** Product & Platform Architecture · **Updated:** 2026-11-10
 
 The thirteen launch industry templates. A template is a **versioned manifest** (see
 [CONFIGURATION_ENGINE.md](CONFIGURATION_ENGINE.md) and the `industry_templates` entity in
@@ -28,7 +28,7 @@ and industry workflows in [../industries/workflows/](../industries/workflows/).
 | `industry.distribution` | Distribution / field sales · التوزيع والمبيعات الميدانية | 017 (**SHIPPED**) | Van stock, credit routes, settlements | `distribution.*`, `sales.commissions`, `sales.credit_limits`; `offline.android_app` at 022 |
 | `industry.food_manufacturing` | Food manufacturing · التصنيع الغذائي | 018 | BOM, batches, genealogy, expiry, QC | `manufacturing.*`, `inventory.batch_tracking` |
 | `industry.professional_services` | Professional services · الخدمات المهنية | 019 (**SHIPPED**) | Contracts, recurring billing, projects | `crm.*`, `accounting.projects`, `accounting.cost_centers` |
-| `industry.rental_logistics` | Rental / logistics · التأجير والخدمات اللوجستية | 019 → **deferred** (decision record in [PHASE-019-COMPLETION.md](../implementation/phases/reports/PHASE-019-COMPLETION.md)) | Contracts, deposits, item availability | `crm.service_contracts`, `items.item_master`, `inventory.stock_ledger` |
+| `industry.rental_logistics` | Rental / logistics · التأجير والخدمات اللوجستية | 035 (**SHIPPED**) | Contracts, deposits, late fees, shipment milestones | `crm.rental_contracts`, `crm.contract_deposits`, `crm.late_fees`, `distribution.shipment_tracking`, `inventory.serial_tracking` |
 | `industry.wholesale` | Wholesale & trade · الجملة والتجارة | 030 (**SHIPPED**) | Quantity-break tiers, credit limits, PDC receivables | `items.price_lists` (qty-break), `partners.credit_terms`, `sales.credit_limits`, `distribution.routes` OPT, `notes.received` |
 | `industry.electronics` | Mobile & electronics · الجوالات والإلكترونيات | 030 (**SHIPPED**) | IMEI register, repair cards, trade-ins | `inventory.serial_tracking` (IMEI), `crm.service_orders` (repairs), `pos.*`, trade-in via purchasing |
 | `industry.healthcare` | Healthcare (commercial shell) · الرعاية الصحية | 031 (**SHIPPED**) | Patient billing, insurance claims, pharmacy batches | insurance-claim billing (AR per claim), `inventory.batch_tracking` (pharmacy), `notes.received` (claims cheques), `crm.service_orders` (visits) |
@@ -63,6 +63,24 @@ and industry workflows in [../industries/workflows/](../industries/workflows/).
 > notes.maturity-calendar / partner.statement contracts (register §J stays closed).
 > The pending v2.0 shells are now education / agriculture (PHASE-032…033). See
 > [reports/PHASE-031-COMPLETION.md](../implementation/phases/reports/PHASE-031-COMPLETION.md).
+>
+> **Shipped status update (2026-11-10, PHASE-035).** The thirteenth and last template —
+> **`industry.rental_logistics` — SHIPPED: 13/13 templates now live.** The gap-closure
+> phase completed the CAPABILITY_MATRIX §3 pending-intake set (the PHASE-019 deferral
+> closed): `crm.rental_contracts` / `crm.contract_deposits` / `crm.late_fees` /
+> `distribution.shipment_tracking` are full FEATURE_CATALOG rows with the
+> migration-0047 plan grants (business + enterprise; starter blocked — the tier-4
+> posture). **Configuration-only per the 0044/0046 convention** (the restored-lineage
+> numbering): migration `0047_industry_rental_logistics.sql` seeds the v1.0.0 manifest
+> through the unmodified PHASE-015 engine — zero new tables/columns/journals/permission
+> keys — with the §J reconciliation notes: `treasury.cash_accounts` → `treasury.accounts`
+> (the LIVE catalog key), `partners.ar_aging` → `ar.aging`, report pins on LIVE keys only
+> (services.contract_revenue_schedule / ar.aging / inventory.valuation — register §J
+> stays closed), and the logistics status-board nav item merged into shipments. The 7
+> new rental POLICY_REGISTRY keys carry no SETTINGS_REGISTRY mapping (the 0039/0040
+> convention); golden effective-configs now pin 40 rows (13 templates × 3 plans +
+> no-template). See
+> [reports/PHASE-035-COMPLETION.md](../implementation/phases/reports/PHASE-035-COMPLETION.md).
 
 ## 1. `industry.retail` — Retail · قالب التجزئة
 
@@ -177,14 +195,21 @@ and industry workflows in [../industries/workflows/](../industries/workflows/).
 ## 8. `industry.rental_logistics` — Rental / logistics · قالب التأجير واللوجستيات
 
 - **Target businesses.** Car/equipment rental, freight agencies, storage providers —
-  contracts, deposits, and availability-driven operations (PHASE-019; framework available
-  from PHASE-015).
+  contracts, deposits, and availability-driven operations. **SHIPPED with PHASE-035
+  (2026-11-10)** — seeded at v1.0.0 by migration `0047_industry_rental_logistics.sql`
+  (the configuration-only 0044/0046 convention: registry seed + the four §25 intake
+  keys' plan grants, nothing else), applying through the unmodified PHASE-015 engine
+  on business/enterprise plans — see
+  [reports/PHASE-035-COMPLETION.md](../implementation/phases/reports/PHASE-035-COMPLETION.md).
 - **Capability needs.** Rental contracts with periodic billing and return workflows,
   deposit handling, asset-level availability (serials), shipment/consignment tracking
   basics.
-- **Key modules emphasized.** `crm.service_contracts` (rental terms), `crm.recurring_billing`,
-  `inventory.serial_tracking` (asset units), `treasury` (deposit handling via on-account
-  amounts, BR-027), `items.item_master` (rental SKUs with own UoM semantics).
+- **Key modules emphasized.** `crm.rental_contracts` (the rental specialization of
+  `crm.service_contracts`), `crm.contract_deposits` + `crm.late_fees`
+  (deposits_late_fees), `crm.recurring_billing`, `distribution.shipment_tracking`,
+  `inventory.serial_tracking` (asset units), `treasury` (deposit handling via
+  on-account amounts, BR-027), `items.item_master` (rental SKUs with own UoM
+  semantics).
 - **Example workflows.** Workflow §8 (contract billing) + return/inspection variant of
   Workflow §4 (condition counts); deposit apply against final invoice.
 - **Manifest pointer.** [../industries/templates/](../industries/templates/) — actual manifest at

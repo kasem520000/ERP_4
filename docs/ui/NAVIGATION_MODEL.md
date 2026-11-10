@@ -1,6 +1,6 @@
 # Navigation Model
 
-> **Status:** STABLE · **Owner:** Design System Architecture · **Updated:** 2026-11-07
+> **Status:** STABLE · **Owner:** Design System Architecture · **Updated:** 2026-11-10
 
 How users move through the platform: the information architecture, the entitlement-driven
 navigation registry, the command menu as universal navigation, back/deep-link behavior,
@@ -186,3 +186,5 @@ hard-coded listeners in screens). POS terminal profiles define their own F-key m
 | Budgets under المحاسبة | PHASE-028 |
 | HR & Payroll group (group 10) + its items | PHASE-029 |
 | Consolidated statements under التقارير | PHASE-034 — **LIVE** (delivered 2026-11-09: the `/consolidation` surfaces — group Settings, the elimination Transaction Entry workspace with the live balanced DR/CR preview, the run Report Page with the snapshot viewer — nav items under group 7 التقارير, `reports.consolidated`) |
+| Public marketing landing page — `/{locale}/welcome` (PUBLIC, the (marketing) route group on the PublicShell marketing variant; anonymous visitors land here — the session home redirects them) | PHASE-035 — **LIVE** (delivered 2026-11-10: bilingual hero + stats + the 13-industry catalog + pricing teaser; +100 phase i18n keys → ar=en=4,286) |
+| Platform control-panel dashboard — `platform.overview` → `/platform/overview` (permission `platform.tenants.view`; archetype Dashboard §1 — 8 KPI tiles + distributions + the e-invoicing funnel + recent platform audit events) | PHASE-035 — **LIVE** (delivered 2026-11-10: over `GET /api/v1/platform/overview` + the migration-0048 sanctioned definer aggregate, audited per use) |
