@@ -38,6 +38,19 @@ export const FEATURE_DEPS: Readonly<Record<string, readonly string[]>> = Object.
   "platform.notifications": [],
   "platform.files": [],
   "platform.data_export": ["platform.tenant_lifecycle"],
+  // PHASE-036 intake (FEATURE_CATALOG §25 protocol; migration 0049
+  // registered the keys + plan grants — business + enterprise, the tier-4
+  // posture): the extensibility & productivity family. custom_picklists
+  // depends on custom_fields (SELECT-type definitions consume picklists);
+  // saved_views/list_export/bulk_actions/record_timeline are standalone
+  // surfaces over the existing entities (bulk reuses each entity's own
+  // approve/post permissions — no privilege widening).
+  "platform.custom_fields": [],
+  "platform.custom_picklists": ["platform.custom_fields"],
+  "platform.saved_views": [],
+  "platform.list_export": [],
+  "platform.bulk_actions": [],
+  "platform.record_timeline": [],
   // accounting
   "accounting.chart_of_accounts": ["platform.onboarding"],
   "accounting.fiscal_calendar": [],

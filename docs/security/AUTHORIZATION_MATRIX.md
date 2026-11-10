@@ -1,6 +1,6 @@
 # Authorization Matrix
 
-> **Status:** STABLE · **Owner:** Security Architecture · **Updated:** 2026-11-07
+> **Status:** STABLE · **Owner:** Security Architecture · **Updated:** 2026-11-10
 
 The normative permission catalog: every permission key, its description (EN + AR), the
 minimal role template(s) that carry it, its scope, and whether it is approval-separated
@@ -17,7 +17,8 @@ UI visibility is derived and never authoritative (directive §9). Implementation
    matching [../architecture/MODULE_BOUNDARIES.md](../architecture/MODULE_BOUNDARIES.md)
    (`accounting`, `sales`, `purchasing`, `inventory`, `partners`, `items`, `treasury`,
    `tax`, `reporting`, `identity`, `tenancy`, `files`, `audit`, `configuration`,
-   `industry` (template-engine keys — owned by the `configuration` module), `crm`,
+   `industry` (template-engine keys — owned by the `configuration` module), `settings`
+   (extensibility-plane keys — owned by the `configuration` module, PHASE-036 §3.16), `crm`,
    `manufacturing`, `distribution`, `pos`, `sync`, `platform`, plus the Blueprint v2.0 modules
    `fixed_assets`, `notes`, `installments`, `budgeting`, `payroll`, `consolidation` —
    [../EXPANSION_REGISTER.md](../EXPANSION_REGISTER.md) §D/§K).
@@ -364,6 +365,46 @@ default), and runs keep the three-way SoD split — create ≠ approve ≠ post.
 | `consolidation.eliminations.post` | Post eliminations to the consolidation books (G-32) / ترحيل قيود الاستبعاد (دفاتر التوحيد) | owner | tenant | **yes** |
 | `consolidation.runs.execute` | Execute a consolidation run — read-only over member books, zero cross-tenant writes (ADR-0018, INV-026) / تنفيذ التوحيد (قراءة فقط) | accountant, owner | tenant | no (audited) |
 | `consolidation.reports.view` | View/run consolidated statement keys ([../reporting/REPORT_CATALOG.md](../reporting/REPORT_CATALOG.md) §10) / تشغيل التقارير الموحدة | viewer, accountant, owner | tenant | no |
+
+### 3.16 `settings` — the extensibility plane (PHASE-036)
+
+The three keys ship in migration `0049_custom_fields_productivity.sql` under module
+`configuration` — the `settings.` namespace is the tenant extensibility plane the
+`extensibility` API module serves. Everything else on the plane is **self-plane and
+carries no key**: definition/picklist/value reads, per-entity value writes, personal
+saved views, and the comments + timeline surfaces resolve to the acting user's own
+rows only (the notifications self-plane precedent, §3.9) — the shared-view publish
+flag is the one gated write on the views surface.
+
+| Permission | Description EN / AR | Minimal roles | Scope | Risky |
+|------------|---------------------|---------------|-------|-------|
+| `settings.custom_fields.manage` | Create/maintain tenant custom field definitions (INV-027: data dimensions, never posting surfaces) / إدارة الحقول المخصصة | accountant, owner | tenant | no (audited) |
+| `settings.picklists.manage` | Maintain custom picklists (option sets for SELECT-type fields) / إدارة قوائم الخيارات المخصصة | accountant, owner | tenant | no |
+| `settings.views.share` | Publish a saved list view as shared (tenant-visible) / نشر عرض قائمة مشترك | accountant, owner | tenant | no (audited) |
+
+Notes (PHASE-036):
+
+- **Rename record (binding):** the phase doc §4 projected `platform.views.manage` for
+  the shared-view key; it landed as `settings.views.share` because §3.10's
+  platform-plane rule keeps `platform.*` keys non-assignable to tenant roles (the
+  owner CROSS JOIN grant wave excludes `platform.*`) — publishing a shared list view
+  is a tenant-admin action, so the permission rides the tenant `settings.` plane while
+  the entitlement stays the `platform.saved_views` feature key (BR-039: both layers).
+- **Bulk endpoints introduce no new keys.** `POST sales/sales-invoices/bulk`,
+  `purchasing/supplier-invoices/bulk`, and `accounting/journal-entries/bulk`
+  (approve/post/void) reuse each entity's existing approve/post keys with a
+  **per-ACTION re-check per row** in the controller; the route registry row names the
+  create-level key (`sales.invoices.create` §3.2, `purchasing.supplier_invoices.create`
+  §3.3, `accounting.journal_entries.create` §3.1 — the void/cancel-level surface). List
+  export (`GET …/export`) rides the entity's `view` key; copy-to-new rides the create
+  key (fresh DRAFT only, never a posted document).
+- **Role grants (0049):** owner and accountant carry all three keys (the 0037 §11
+  explicit IN-list convention); viewer/sales/purchasing keep personal views only (no
+  share key). The six `platform.*` **feature keys** of the phase
+  (`platform.custom_fields`, `platform.custom_picklists`, `platform.saved_views`,
+  `platform.list_export`, `platform.bulk_actions`, `platform.record_timeline`) are
+  entitlements, not permissions — plan-granted business + enterprise, starter blocked
+  (FEATURE_CATALOG §3; the tier-4 posture).
 
 ## 4. Segregation of duties & approval limits
 

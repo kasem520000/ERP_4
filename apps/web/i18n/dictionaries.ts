@@ -4638,6 +4638,140 @@ export interface Dictionary {
   consolidationInv026Pass: string;
   consolidationInv026Fail: string;
   consolidationInv026Compared: string;
+
+  // -- PHASE-036 (P36-W): custom fields, picklists, saved views, bulk
+  // actions, list export, timeline comments — the extensibility plane ------
+  cfTitle: string;
+  cfSubTitle: string;
+  cfEntityKind: string;
+  cfDefinitions: string;
+  cfNewField: string;
+  cfEditField: string;
+  cfKey: string;
+  cfKeyHint: string;
+  cfKeyImmutable: string;
+  cfLabel: string;
+  cfLabelAr: string;
+  cfType: string;
+  cfTypeText: string;
+  cfTypeNumber: string;
+  cfTypeMoney: string;
+  cfTypeDate: string;
+  cfTypeBoolean: string;
+  cfTypeSelect: string;
+  cfPicklist: string;
+  cfPicklistNone: string;
+  cfPicklistRequired: string;
+  cfPicklistHint: string;
+  cfRequired: string;
+  cfRequiredHint: string;
+  cfShowInList: string;
+  cfSort: string;
+  cfHelpText: string;
+  cfHelpTextAr: string;
+  cfValidation: string;
+  cfValidationHint: string;
+  cfRegex: string;
+  cfMin: string;
+  cfMax: string;
+  cfMinDate: string;
+  cfMaxDate: string;
+  cfActive: string;
+  cfActions: string;
+  cfEdit: string;
+  cfDelete: string;
+  cfDeleteConfirm: string;
+  cfDeactivate: string;
+  cfActivate: string;
+  cfSaved: string;
+  cfSaveFailed: string;
+  cfDeleted: string;
+  cfEmpty: string;
+  cfInUse: string;
+  cfUsedByFields: string;
+  cfYes: string;
+  cfNo: string;
+  cfPicklists: string;
+  cfNewPicklist: string;
+  cfPicklistKey: string;
+  cfPicklistName: string;
+  cfPicklistNameAr: string;
+  cfPicklistSaved: string;
+  cfPicklistDeleted: string;
+  cfPicklistDeleteConfirm: string;
+  cfPicklistEmpty: string;
+  cfPicklistOptionsHint: string;
+  cfOptions: string;
+  cfOptionsCount: string;
+  cfOptionValue: string;
+  cfOptionLabel: string;
+  cfOptionLabelAr: string;
+  cfAddOption: string;
+  cfRemoveOption: string;
+  cfOptionAdded: string;
+  cfOptionDeleted: string;
+  cfEntityPartner: string;
+  cfEntityItem: string;
+  cfEntitySalesQuotation: string;
+  cfEntitySalesOrder: string;
+  cfEntitySalesInvoice: string;
+  cfEntityPurchaseOrder: string;
+  cfEntitySupplierInvoice: string;
+  cfEntityJournalEntry: string;
+  cfEntityFixedAsset: string;
+  cfEntityEmployee: string;
+  cfEntityExpense: string;
+  svTitle: string;
+  svMyViews: string;
+  svSharedViews: string;
+  svSaveView: string;
+  svViewName: string;
+  svShared: string;
+  svSharedHint: string;
+  svDefault: string;
+  svDefaultHint: string;
+  svApply: string;
+  svDelete: string;
+  svNoViews: string;
+  svColumns: string;
+  svChooseColumns: string;
+  svSearchColumns: string;
+  svExport: string;
+  svExportCsv: string;
+  svExportXlsx: string;
+  svViewSaved: string;
+  svViewDeleted: string;
+  svViewApplied: string;
+  svSaveFailed: string;
+  exportFailed: string;
+  bulkSelected: string;
+  bulkApprove: string;
+  bulkPost: string;
+  bulkVoid: string;
+  bulkClear: string;
+  bulkResult: string;
+  bulkSucceeded: string;
+  bulkFailed: string;
+  bulkNoSelection: string;
+  bulkFailedRows: string;
+  bulkSummary: string;
+  bulkRowError: string;
+  timelineTitle: string;
+  timelineAudit: string;
+  timelineComment: string;
+  timelineAction: string;
+  timelineNoEntries: string;
+  timelineAddComment: string;
+  timelineCommentPlaceholder: string;
+  timelineSend: string;
+  timelineMentionHint: string;
+  timelineClose: string;
+  timelineCommentSent: string;
+  timelineFailed: string;
+  rowActions: string;
+  rowCopyToNew: string;
+  rowCopyConfirm: string;
+  rowCopied: string;
 }
 
 const ar: Dictionary = {
@@ -9278,6 +9412,139 @@ const ar: Dictionary = {
   consolidationInv026Pass: "INV-026: سليمة",
   consolidationInv026Fail: "INV-026: انحراف",
   consolidationInv026Compared: "المقارنة: {left} مقابل {right}",
+
+  // -- PHASE-036 (P36-W): الحقول المخصصة والعروض المحفوظة والإجراءات الجماعية --
+  cfTitle: "الحقول المخصصة",
+  cfSubTitle: "أضف حقولًا إضافية إلى كيانات الأعمال وتحقق من قيمها دون تعديل النظام الأساسي.",
+  cfEntityKind: "نوع الكيان",
+  cfDefinitions: "تعريفات الحقول",
+  cfNewField: "حقل جديد",
+  cfEditField: "تعديل الحقل",
+  cfKey: "المعرّف (Key)",
+  cfKeyHint: "أحرف إنجليزية صغيرة وأرقام وشرطة سفلية ويبدأ بحرف (٦٠ حرفًا كحد أقصى).",
+  cfKeyImmutable: "لا يمكن تغيير المعرّف بعد الإنشاء.",
+  cfLabel: "التسمية (إنجليزي)",
+  cfLabelAr: "التسمية (عربي)",
+  cfType: "نوع الحقل",
+  cfTypeText: "نص",
+  cfTypeNumber: "رقم",
+  cfTypeMoney: "مبلغ مالي",
+  cfTypeDate: "تاريخ",
+  cfTypeBoolean: "نعم / لا",
+  cfTypeSelect: "قائمة اختيار",
+  cfPicklist: "قائمة الاختيار",
+  cfPicklistNone: "— بدون قائمة —",
+  cfPicklistRequired: "حقول «قائمة الاختيار» تتطلب اختيار قائمة.",
+  cfPicklistHint: "تُستخدم مع نوع «قائمة اختيار» فقط.",
+  cfRequired: "إلزامي",
+  cfRequiredHint: "غير متاح لحقول «نعم / لا».",
+  cfShowInList: "إظهار في القائمة",
+  cfSort: "الترتيب",
+  cfHelpText: "نص المساعدة (إنجليزي)",
+  cfHelpTextAr: "نص المساعدة (عربي)",
+  cfValidation: "قواعد التحقق",
+  cfValidationHint: "تُطبَّق بحسب النوع: النمط للنص، والحدود للأرقام والمبالغ، ونطاق التاريخ للتواريخ.",
+  cfRegex: "التعبير النمطي (Regex)",
+  cfMin: "الحد الأدنى",
+  cfMax: "الحد الأعلى",
+  cfMinDate: "أقرب تاريخ مسموح",
+  cfMaxDate: "أبعد تاريخ مسموح",
+  cfActive: "نشط",
+  cfActions: "الإجراءات",
+  cfEdit: "تعديل",
+  cfDelete: "حذف",
+  cfDeleteConfirm: "هل تريد حذف هذا الحقل المخصص؟ سيتم فقدان القيم المسجّلة عليه.",
+  cfDeactivate: "إيقاف الحقل",
+  cfActivate: "تنشيط الحقل",
+  cfSaved: "تم حفظ الحقل المخصص.",
+  cfSaveFailed: "تعذّر حفظ الحقل المخصص.",
+  cfDeleted: "تم حذف الحقل المخصص.",
+  cfEmpty: "لا توجد حقول مخصصة لهذا الكيان بعد.",
+  cfInUse: "مستخدمة",
+  cfUsedByFields: "مستخدمة في {count} من الحقول",
+  cfYes: "نعم",
+  cfNo: "لا",
+  cfPicklists: "قوائم الاختيار",
+  cfNewPicklist: "قائمة جديدة",
+  cfPicklistKey: "المعرّف (Key)",
+  cfPicklistName: "الاسم (إنجليزي)",
+  cfPicklistNameAr: "الاسم (عربي)",
+  cfPicklistSaved: "تم حفظ قائمة الاختيار.",
+  cfPicklistDeleted: "تم حذف قائمة الاختيار.",
+  cfPicklistDeleteConfirm: "هل تريد حذف هذه القائمة؟ لا يمكن حذف قائمة مستخدمة في حقول نشطة.",
+  cfPicklistEmpty: "لا توجد قوائم اختيار بعد.",
+  cfPicklistOptionsHint: "أضف الخيارات الأولية؛ ويمكن إضافة المزيد لاحقًا.",
+  cfOptions: "الخيارات",
+  cfOptionsCount: "{count} خيارًا",
+  cfOptionValue: "القيمة",
+  cfOptionLabel: "التسمية (إنجليزي)",
+  cfOptionLabelAr: "التسمية (عربي)",
+  cfAddOption: "إضافة خيار",
+  cfRemoveOption: "حذف الخيار",
+  cfOptionAdded: "تمت إضافة الخيار.",
+  cfOptionDeleted: "تم حذف الخيار.",
+  cfEntityPartner: "الشركاء",
+  cfEntityItem: "الأصناف",
+  cfEntitySalesQuotation: "عروض الأسعار",
+  cfEntitySalesOrder: "أوامر البيع",
+  cfEntitySalesInvoice: "فواتير البيع",
+  cfEntityPurchaseOrder: "أوامر الشراء",
+  cfEntitySupplierInvoice: "فواتير الموردين",
+  cfEntityJournalEntry: "قيود اليومية",
+  cfEntityFixedAsset: "الأصول الثابتة",
+  cfEntityEmployee: "الموظفون",
+  cfEntityExpense: "المصروفات",
+  svTitle: "العروض المحفوظة",
+  svMyViews: "عروضي",
+  svSharedViews: "العروض المشتركة",
+  svSaveView: "حفظ العرض الحالي",
+  svViewName: "اسم العرض",
+  svShared: "مشاركة العرض مع جميع المستخدمين",
+  svSharedHint: "تتطلب صلاحية مشاركة العروض.",
+  svDefault: "افتراضي",
+  svDefaultHint: "يُطبَّق العرض الافتراضي تلقائيًا عند فتح القائمة.",
+  svApply: "تطبيق",
+  svDelete: "حذف",
+  svNoViews: "لا توجد عروض محفوظة بعد.",
+  svColumns: "الأعمدة",
+  svChooseColumns: "اختيار الأعمدة",
+  svSearchColumns: "ابحث في الأعمدة…",
+  svExport: "تصدير",
+  svExportCsv: "تصدير CSV",
+  svExportXlsx: "تصدير Excel",
+  svViewSaved: "تم حفظ العرض.",
+  svViewDeleted: "تم حذف العرض.",
+  svViewApplied: "تم تطبيق العرض.",
+  svSaveFailed: "تعذّر حفظ العرض.",
+  exportFailed: "تعذّر بدء عملية التصدير.",
+  bulkSelected: "تم تحديد {count}",
+  bulkApprove: "اعتماد المحدد",
+  bulkPost: "ترحيل المحدد",
+  bulkVoid: "إلغاء المحدد",
+  bulkClear: "إلغاء التحديد",
+  bulkResult: "نتيجة الإجراء الجماعي",
+  bulkSucceeded: "نجح: {count}",
+  bulkFailed: "فشل: {count}",
+  bulkNoSelection: "لم يتم تحديد أي صفوف.",
+  bulkFailedRows: "الصفوف الفاشلة",
+  bulkSummary: "{action} — نجح {succeeded} من {requested}",
+  bulkRowError: "{id}: {code}",
+  timelineTitle: "سجل النشاط والملاحظات",
+  timelineAudit: "تدقيق",
+  timelineComment: "ملاحظة",
+  timelineAction: "الإجراء",
+  timelineNoEntries: "لا يوجد نشاط على هذا المستند بعد.",
+  timelineAddComment: "إضافة ملاحظة",
+  timelineCommentPlaceholder: "اكتب ملاحظتك…",
+  timelineSend: "إرسال",
+  timelineMentionHint: "للإشارة إلى مستخدم اكتب @ متبوعةً بمعرّفه (UUID).",
+  timelineClose: "إغلاق",
+  timelineCommentSent: "تم إرسال الملاحظة.",
+  timelineFailed: "تعذّر تحميل السجل.",
+  rowActions: "إجراءات الصف",
+  rowCopyToNew: "نسخ إلى مستند جديد",
+  rowCopyConfirm: "سيتم إنشاء مسودة جديدة بنفس محتوى هذا المستند.",
+  rowCopied: "تم نسخ المستند إلى مسودة جديدة.",
 };
 
 const en: Dictionary = {
@@ -13927,6 +14194,139 @@ const en: Dictionary = {
   consolidationInv026Pass: "INV-026: PASS",
   consolidationInv026Fail: "INV-026: FAIL",
   consolidationInv026Compared: "Compared: {left} vs {right}",
+
+  // -- PHASE-036 (P36-W): custom fields, saved views, bulk actions ---------
+  cfTitle: "Custom fields",
+  cfSubTitle: "Add extra fields to business entities with typed validation — no core code changes.",
+  cfEntityKind: "Entity",
+  cfDefinitions: "Field definitions",
+  cfNewField: "New field",
+  cfEditField: "Edit field",
+  cfKey: "Key",
+  cfKeyHint: "Lowercase letters, digits and underscores, starting with a letter (max 60).",
+  cfKeyImmutable: "The key cannot be changed after creation.",
+  cfLabel: "Label (English)",
+  cfLabelAr: "Label (Arabic)",
+  cfType: "Field type",
+  cfTypeText: "Text",
+  cfTypeNumber: "Number",
+  cfTypeMoney: "Money",
+  cfTypeDate: "Date",
+  cfTypeBoolean: "Yes / No",
+  cfTypeSelect: "Select list",
+  cfPicklist: "Picklist",
+  cfPicklistNone: "— no picklist —",
+  cfPicklistRequired: "Select-list fields require a picklist.",
+  cfPicklistHint: "Used with the Select list type only.",
+  cfRequired: "Required",
+  cfRequiredHint: "Not available for Yes / No fields.",
+  cfShowInList: "Show in list",
+  cfSort: "Sort order",
+  cfHelpText: "Help text (English)",
+  cfHelpTextAr: "Help text (Arabic)",
+  cfValidation: "Validation rules",
+  cfValidationHint: "Applied per type: pattern for text, bounds for numbers and money, date range for dates.",
+  cfRegex: "Regex pattern",
+  cfMin: "Minimum",
+  cfMax: "Maximum",
+  cfMinDate: "Earliest date",
+  cfMaxDate: "Latest date",
+  cfActive: "Active",
+  cfActions: "Actions",
+  cfEdit: "Edit",
+  cfDelete: "Delete",
+  cfDeleteConfirm: "Delete this custom field? Recorded values will be lost.",
+  cfDeactivate: "Deactivate field",
+  cfActivate: "Activate field",
+  cfSaved: "Custom field saved.",
+  cfSaveFailed: "Could not save the custom field.",
+  cfDeleted: "Custom field deleted.",
+  cfEmpty: "No custom fields for this entity yet.",
+  cfInUse: "In use",
+  cfUsedByFields: "Used by {count} field(s)",
+  cfYes: "Yes",
+  cfNo: "No",
+  cfPicklists: "Picklists",
+  cfNewPicklist: "New picklist",
+  cfPicklistKey: "Key",
+  cfPicklistName: "Name (English)",
+  cfPicklistNameAr: "Name (Arabic)",
+  cfPicklistSaved: "Picklist saved.",
+  cfPicklistDeleted: "Picklist deleted.",
+  cfPicklistDeleteConfirm: "Delete this picklist? Lists used by active fields cannot be deleted.",
+  cfPicklistEmpty: "No picklists yet.",
+  cfPicklistOptionsHint: "Add the initial options; more can be added later.",
+  cfOptions: "Options",
+  cfOptionsCount: "{count} option(s)",
+  cfOptionValue: "Value",
+  cfOptionLabel: "Label (English)",
+  cfOptionLabelAr: "Label (Arabic)",
+  cfAddOption: "Add option",
+  cfRemoveOption: "Remove option",
+  cfOptionAdded: "Option added.",
+  cfOptionDeleted: "Option removed.",
+  cfEntityPartner: "Partners",
+  cfEntityItem: "Items",
+  cfEntitySalesQuotation: "Sales quotations",
+  cfEntitySalesOrder: "Sales orders",
+  cfEntitySalesInvoice: "Sales invoices",
+  cfEntityPurchaseOrder: "Purchase orders",
+  cfEntitySupplierInvoice: "Supplier invoices",
+  cfEntityJournalEntry: "Journal entries",
+  cfEntityFixedAsset: "Fixed assets",
+  cfEntityEmployee: "Employees",
+  cfEntityExpense: "Expenses",
+  svTitle: "Saved views",
+  svMyViews: "My views",
+  svSharedViews: "Shared views",
+  svSaveView: "Save current view",
+  svViewName: "View name",
+  svShared: "Share the view with all users",
+  svSharedHint: "Requires the share-views permission.",
+  svDefault: "Default",
+  svDefaultHint: "The default view is applied automatically when the list opens.",
+  svApply: "Apply",
+  svDelete: "Delete",
+  svNoViews: "No saved views yet.",
+  svColumns: "Columns",
+  svChooseColumns: "Choose columns",
+  svSearchColumns: "Search columns…",
+  svExport: "Export",
+  svExportCsv: "Export CSV",
+  svExportXlsx: "Export Excel",
+  svViewSaved: "View saved.",
+  svViewDeleted: "View deleted.",
+  svViewApplied: "View applied.",
+  svSaveFailed: "Could not save the view.",
+  exportFailed: "Could not start the export.",
+  bulkSelected: "{count} selected",
+  bulkApprove: "Approve selected",
+  bulkPost: "Post selected",
+  bulkVoid: "Void selected",
+  bulkClear: "Clear selection",
+  bulkResult: "Bulk action result",
+  bulkSucceeded: "Succeeded: {count}",
+  bulkFailed: "Failed: {count}",
+  bulkNoSelection: "No rows selected.",
+  bulkFailedRows: "Failed rows",
+  bulkSummary: "{action} — {succeeded} of {requested} succeeded",
+  bulkRowError: "{id}: {code}",
+  timelineTitle: "Activity & notes",
+  timelineAudit: "Audit",
+  timelineComment: "Note",
+  timelineAction: "Action",
+  timelineNoEntries: "No activity on this document yet.",
+  timelineAddComment: "Add a note",
+  timelineCommentPlaceholder: "Write your note…",
+  timelineSend: "Send",
+  timelineMentionHint: "To mention a user, type @ followed by their id (UUID).",
+  timelineClose: "Close",
+  timelineCommentSent: "Note sent.",
+  timelineFailed: "Could not load the timeline.",
+  rowActions: "Row actions",
+  rowCopyToNew: "Copy to new document",
+  rowCopyConfirm: "A new draft will be created with this document's content.",
+  rowCopied: "Document copied to a new draft.",
 };
 
 const dictionaries: Record<Locale, Dictionary> = { ar, en };

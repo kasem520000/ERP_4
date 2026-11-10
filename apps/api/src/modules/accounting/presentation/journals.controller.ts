@@ -10,14 +10,20 @@ import {
   Post,
   Query,
   Req,
+  Res,
 } from "@nestjs/common";
-import type { Request } from "express";
+import type { Request, Response } from "express";
 import { z } from "zod";
+
+import { bulkActionRequestSchema } from "@erp/contracts";
 
 import { envelope, paginatedEnvelope } from "../../../infra/http/envelope";
 import { identityOf, type SessionContext } from "../../../infra/context/session-context";
 import { RequirePermissions } from "../../../infra/auth/require-permissions.decorator";
-import { UnauthenticatedError } from "../../identity/api/identity";
+import { RequireFeature } from "../../../infra/auth/require-feature.decorator";
+import { executeBulk } from "../../extensibility/application/bulk-actions";
+import { cell, toCsv, toXlsx, type ExportColumn } from "../../extensibility/application/list-export";
+import { ForbiddenError, UnauthenticatedError } from "../../identity/api/identity";
 import { JournalService } from "../application/journal-service";
 import { OpeningBalancesPostingService } from "../application/opening-balances-service";
 import { YearEndService } from "../application/year-end-service";
@@ -261,6 +267,100 @@ export class JournalsController {
     const identity = requireIdentity(request);
     const input = z.object({ reason: z.string().min(3).max(500) }).parse(body);
     return envelope(await this.journals.cancel(identity.userId, id, input.reason));
+  }
+
+  // -- PHASE-036 productivity surfaces (bulk / export) ------------------------------------
+
+  /**
+   * PHASE-036 T36-4 (FD-01): bulk approve/post/void over the EXISTING
+   * journal lifecycle service — per-row report envelope (partial failure
+   * reported, never silent). Per-ACTION key re-check (approve/post keys
+   * stronger than the route's create-level row — matrix §3.16 note).
+   */
+  @Post("journal-entries/bulk")
+  @RequirePermissions("accounting.journal_entries.create")
+  @RequireFeature("platform.bulk_actions")
+  @HttpCode(HttpStatus.OK)
+  async bulk(@Req() request: Request, @Body() body: unknown): Promise<unknown> {
+    const identity = requireIdentity(request);
+    const input = bulkActionRequestSchema.parse(body);
+    const actionPermissions: Record<string, string> = {
+      approve: "accounting.journal_entries.approve",
+      post: "accounting.journal_entries.post",
+      void: "accounting.journal_entries.create",
+    };
+    const required = actionPermissions[input.action];
+    if (required === undefined || identity.permissions?.has(required) !== true) {
+      throw new ForbiddenError(required ?? `accounting.journal_entries.${input.action}`);
+    }
+    return envelope(
+      await executeBulk(input.action, input.ids, ({ id }) => {
+        if (input.action === "approve") {
+          return this.journals.approve(identity.userId, id, undefined);
+        }
+        if (input.action === "post") {
+          return this.journals.post(identity.userId, id, {});
+        }
+        return this.journals.cancel(identity.userId, id, "BULK_VOID");
+      }),
+    );
+  }
+
+  /**
+   * PHASE-036 T36-5 (FD-04): the journal-entry list export (csv/xlsx,
+   * server-side, filters + visible columns honored — never a client-side
+   * grid dump).
+   */
+  @Get("journal-entries/export")
+  @RequirePermissions("accounting.journal_entries.view")
+  @RequireFeature("platform.list_export")
+  async export(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Query("status") status?: string,
+    @Query("format") format?: string,
+    @Query("columns") columns?: string,
+  ): Promise<void> {
+    requireIdentity(request);
+    const rows = await this.journals.list({ status, limit: 2000 });
+    const allColumns: ExportColumn[] = [
+      { key: "entryDate", header: "Date" },
+      { key: "currencyCode", header: "Currency" },
+      { key: "reference", header: "Reference" },
+      { key: "description", header: "Description" },
+      { key: "status", header: "Status" },
+      { key: "id", header: "Id" },
+    ];
+    const selected = (columns ?? "")
+      .split(",")
+      .map((column) => column.trim())
+      .filter((column) => column.length > 0);
+    const exportColumns = selected.length > 0
+      ? allColumns.filter((column) => selected.includes(column.key))
+      : allColumns;
+    const sheet = {
+      name: "journal-entries",
+      columns: exportColumns,
+      rows: rows.map((row) => ({
+        entryDate: cell(row.entryDate),
+        currencyCode: cell(row.currencyCode),
+        reference: cell(row.reference),
+        description: cell(row.description),
+        status: cell(row.status),
+        id: cell(row.id),
+      })),
+    };
+    const stamp = new Date().toISOString().slice(0, 10);
+    if (format === "xlsx") {
+      const buffer = await toXlsx([sheet]);
+      response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      response.header("Content-Disposition", `attachment; filename="journal-entries-${stamp}.xlsx"`);
+      response.status(200).send(buffer);
+    } else {
+      response.header("Content-Type", "text/csv; charset=utf-8");
+      response.header("Content-Disposition", `attachment; filename="journal-entries-${stamp}.csv"`);
+      response.status(200).send(toCsv(sheet));
+    }
   }
 
   @Get("journal-entries/:id/preview")

@@ -318,6 +318,20 @@ export const SETTINGS_REGISTRY: Readonly<Record<string, SettingDefinition>> = Ob
     description:
       "BR-011: a supplier invoice whose (supplier, number, amount) triple already exists is blocked; 'warn' downgrades the same-triple case to a warning (the (supplier, number) different-amount case always warns).",
   }),
+  // PHASE-036 (AD-36-10 — the duplicate-detection tolerance): an invoice
+  // whose amount falls within ±this percent of an existing (supplier,
+  // number) invoice's amount counts as the same amount for the triple
+  // check. 0 = exact match only (the pre-036 behavior); the currency
+  // dimension joins the match key so cross-currency invoices never
+  // collide. The 028/029 SETTINGS wave pattern — a policy-key wave ⇒
+  // golden effective-configs re-pin (see the phase's agent-ctx record).
+  "purchasing.duplicate_invoice_tolerance_pct": Object.freeze({
+    key: "purchasing.duplicate_invoice_tolerance_pct",
+    schema: z.number().min(0).max(10),
+    default: 0,
+    description:
+      "PHASE-036 (AD-36-10): amount tolerance percent for supplier-invoice duplicate detection — amounts within ±pct of an existing (supplier, number, currency) invoice count as the same; 0 = exact only.",
+  }),
   "purchasing.input_vat_default": Object.freeze({
     key: "purchasing.input_vat_default",
     schema: z.enum(["recoverable", "expensed"]),

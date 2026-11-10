@@ -743,6 +743,44 @@ export async function findInvoiceDuplicate(input: {
     : { kind: "number", existingId: row.id, existingAmount: row.amount, existingDate: row.documentDate };
 }
 
+/**
+ * PHASE-036 T36-7 (AD-36-10): the PLURAL duplicate scan — every
+ * non-CANCELLED (supplier, number) candidate with its currency, the full
+ * match key's dimension. The pure classifier (duplicate-check.ts) applies
+ * the tolerance + currency rules; this query only fetches candidates.
+ */
+export async function findInvoiceDuplicates(input: {
+  supplierId: string;
+  invoiceNo: string;
+}): Promise<
+  readonly {
+    id: string;
+    invoiceNo: string;
+    amount: string;
+    currency: string;
+    invoiceDate: string;
+    status: string;
+  }[]
+> {
+  const rows = await tenantTx().execute(sql`
+    SELECT id, invoice_no AS "invoiceNo", total_gross::text AS amount,
+           currency_code AS currency, invoice_date::text AS "invoiceDate", status
+    FROM supplier_invoices
+    WHERE supplier_id = ${input.supplierId} AND invoice_no = ${input.invoiceNo}
+      AND status <> 'CANCELLED'
+    ORDER BY created_at
+    LIMIT 50
+  `);
+  return rows.rows as unknown as {
+    id: string;
+    invoiceNo: string;
+    amount: string;
+    currency: string;
+    invoiceDate: string;
+    status: string;
+  }[];
+}
+
 /** Posted invoice qty per GRN line (the GRNI remaining + over-invoice guard base). */
 export async function grnLineInvoicedQty(): Promise<Map<string, string>> {
   const rows = await tenantTx().execute(sql`

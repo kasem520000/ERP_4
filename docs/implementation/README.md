@@ -4,11 +4,14 @@
 
 ## Structure
 
-- [phases/](phases/) — `PHASE-001.md` … `PHASE-035.md`: one document per phase (001–025
+- [phases/](phases/) — `PHASE-001.md` … `PHASE-058.md`: one document per phase (001–025
   are the v1.1 baseline; 026–034 are the Blueprint v2.0 post-GA expansion phases, stages
   9–11, per [../EXPANSION_REGISTER.md](../EXPANSION_REGISTER.md) §B; **035 is the
   post-roadmap gap-closure phase** — the first maintenance phase past the completed
-  roadmap, recorded per [../planning/MASTER_ROADMAP.md](../planning/MASTER_ROADMAP.md)'s
+  roadmap; **036 is the post-roadmap expansion program v3.0's first executed phase —
+  COMPLETE (the extensibility backbone); 037–058 are PLANNED** per
+  [../planning/POST_ROADMAP_EXPANSION_REGISTER.md](../planning/POST_ROADMAP_EXPANSION_REGISTER.md),
+  recorded per [../planning/MASTER_ROADMAP.md](../planning/MASTER_ROADMAP.md)'s
   post-roadmap note). Each
   phase document contains the **29 mandatory content items** required by the directive,
   distributed across **8 numbered sections** (mapping below).

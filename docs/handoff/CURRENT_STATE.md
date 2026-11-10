@@ -17,8 +17,8 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
   status, release strategy, risk register), database (conventions, entity catalog, data
   dictionary, relationships, constraints/indexes, tenant isolation, migration strategy,
   backup/recovery, ERDs, table specs, seeds), product (personas, journeys, workflows,
-  BR-001…056 business rules, industry/feature catalogs — 22 modules, 176 feature keys
-  (134 v1.1 + 38 v2.0 + 4 PHASE-035 intake) — subscriptions & entitlements,
+  BR-001…056 business rules, industry/feature catalogs — 22 modules, 182 feature keys
+  (134 v1.1 + 38 v2.0 + 4 PHASE-035 intake + 6 PHASE-036 extensibility intake) — subscriptions & entitlements,
   configuration engine), accounting (principles, bilingual CoA, posting engine,
   document lifecycle, journal rules with golden postings G-01…G-32, AR/AP, inventory
   accounting, period closing,
@@ -539,7 +539,7 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
     CSRF double-submit, generic proxy; login/register/forgot/accept on the
     public card shell; admin/console lists on DataTable archetypes with the
     navigation-driven app shell; CSP middleware (per-request nonce, §8 header
-    set, probe-tested against the built app); typed dictionaries at 4,286 keys
+    set, probe-tested against the built app); typed dictionaries at 4,417 keys
     with triple parity enforcement (TS + runtime + CI script).
   - `apps/desktop` — **`@erp/desktop` (PHASE-021, the Tauri v2 shell runtime)**: ALL
     application logic in TypeScript (`src/**` — the dual-profile SQLite store with
@@ -764,11 +764,16 @@ table) and [NEXT_ACTION.md](NEXT_ACTION.md).
   migration-0048 SECURITY DEFINER aggregate, the THIRTEENTH industry template
   `industry.rental_logistics` by migration 0047, and the a4-payslip print
   template with `GET /api/v1/payroll/runs/:id/payslips/print`)**
-  (migrations 0001–0048 — schema_version 48 (0047 rental template + 0048
-  platform overview definer); CURRENT_SHIPPED_PHASE
-  PHASE-035; 13 shipped industry templates (13/13 manifests validated); report
+  (migrations 0001–0049 — schema_version 49 (0047 rental template + 0048
+  platform overview definer + 0049 the extensibility backbone); CURRENT_SHIPPED_PHASE
+  PHASE-036 — the post-roadmap expansion program v3.0's first executed phase (the
+  custom-fields engine + picklists + saved views + record comments 🔒 + the bulk/
+  export/copy-to-new productivity suite + the duplicate-invoice tolerance; INV-027
+  machine-checked; the new `/{locale}/settings/custom-fields` manager is the 146th
+  screen); 13 shipped industry templates (13/13 manifests validated); report
   registry 85 contracts;
-  permissions 245=245; web i18n 4,286=4,286; the centralized posting engine with the full
+  permissions 248=248 (the §3.16 extensibility family seeded by 0049); web i18n
+  4,417=4,417 (+131 phase keys); the centralized posting engine with the full
   invariant suite is live and proven by its consumers — treasury posts every
   money movement through it, tax stamps every tax-carrying line with frozen
   rate snapshots BR-033, inventory posts every stock movement through it

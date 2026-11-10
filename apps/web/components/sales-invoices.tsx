@@ -7,12 +7,29 @@
  * jsonb — BLOCK shows the override checkbox, gated by
  * sales.credit_check.override server-side) → post (G-01/G-02 + G-03 when
  * with-goods). Print stays honestly disabled until PHASE-013 (§7).
+ *
+ * PHASE-036 (P36-W) — the productivity surfaces, additive on top of the
+ * existing flows: row selection + the bulk bar (approve/post/void via
+ * sales/sales-invoices/bulk with the per-row report), the list toolbar
+ * (column chooser + saved views + CSV/XLSX export through the dedicated
+ * BFF streaming route), per-row copy-to-new (a fresh DRAFT) and the
+ * record timeline drawer (audit + comments).
  */
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 
-import { Badge, Button, Checkbox, DataTable, DatePicker, Input, Select } from "@erp/ui";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  DataTable,
+  DatePicker,
+  Input,
+  Select,
+  type DataTableColumn,
+  type DataTableSort,
+} from "@erp/ui";
 
 import { getDictionary, type Locale } from "../i18n/dictionaries";
 import type {
@@ -25,9 +42,12 @@ import type {
   TaxCodeRow,
 } from "../lib/api-types";
 import { bffFetch } from "../lib/client-api";
-import { localizedName, localizedSalesError, salesStatusLabel } from "../lib/messages";
+import { formatMessage, localizedName, localizedSalesError, salesStatusLabel } from "../lib/messages";
+import { BulkActionsBar } from "./bulk-actions-bar";
 import { Card } from "./card";
 import { ErrorNotice, SuccessNotice } from "./notices";
+import { ListToolbar } from "./list-toolbar";
+import { RecordTimeline } from "./record-timeline";
 import { activeLocaleHeader } from "./table-header";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,6 +56,19 @@ const PRICE_RE = /^\d+(\.\d{1,6})?$/;
 const MONEY_RE = /^\d+(\.\d{1,4})?$/;
 const RATE_RE = /^\d+(\.\d{1,8})?$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The canonical list column ids (the toolbar/column-chooser key space). */
+const LIST_COLUMN_KEYS = [
+  "no",
+  "kind",
+  "customer",
+  "date",
+  "due",
+  "net",
+  "gross",
+  "creditCheck",
+  "status",
+] as const;
 
 interface DraftLine {
   itemId: string;
@@ -88,6 +121,7 @@ export function SalesInvoices({
   canApprove,
   canOverrideCredit,
   canPost,
+  canShareViews,
 }: {
   locale: Locale;
   initialInvoices: readonly SalesInvoiceRow[];
@@ -102,6 +136,8 @@ export function SalesInvoices({
   canApprove: boolean;
   canOverrideCredit: boolean;
   canPost: boolean;
+  /** settings.views.share — gates the shared-view checkbox in the toolbar. */
+  canShareViews: boolean;
 }): JSX.Element {
   const d = getDictionary(locale);
   const router = useRouter();
@@ -127,6 +163,12 @@ export function SalesInvoices({
   const [overrideCredit, setOverrideCredit] = useState(false);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+
+  // PHASE-036 productivity state: row selection, list filters/sort, columns.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<DataTableSort[]>([]);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([...LIST_COLUMN_KEYS]);
 
   const customerNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -273,6 +315,159 @@ export function SalesInvoices({
       setInvoices((rows) => rows.map((row) => (row.id === id ? updated : row)));
     }
   }
+
+  /** PHASE-036 (FD-08): copy-to-new — a fresh DRAFT with the stored lines. */
+  async function copyToNew(id: string): Promise<void> {
+    const created = await call<SalesInvoiceRow>(`copy-${id}`, () =>
+      bffFetch<SalesInvoiceRow>(`sales/sales-invoices/${id}/copy-to-new`, {
+        method: "POST",
+        body: {},
+      }),
+    );
+    if (created !== undefined) {
+      setInvoices((rows) => [created, ...rows]);
+      setNotice(d.rowCopied);
+    }
+  }
+
+  /** Re-reads the list after a bulk run (the bar reports per-row outcomes). */
+  async function reloadInvoices(): Promise<void> {
+    const result = await bffFetch<readonly SalesInvoiceRow[]>("sales/sales-invoices?limit=200");
+    if (result.ok) {
+      setInvoices(result.data);
+    }
+    router.refresh();
+  }
+
+  const invoiceColumns: Array<DataTableColumn<SalesInvoiceRow>> = [
+    {
+      id: "no",
+      header: activeLocaleHeader(d.salesInvoiceNo),
+      accessor: (row: SalesInvoiceRow) => row.invoiceNo ?? "—",
+      mono: true,
+      sortable: true,
+      render: (row: SalesInvoiceRow) => (
+        <span className="font-mono text-sm" dir="ltr">{row.invoiceNo ?? "—"}</span>
+      ),
+    },
+    {
+      id: "kind",
+      header: activeLocaleHeader(d.salesKind),
+      accessor: (row: SalesInvoiceRow) => row.kind,
+      sortable: true,
+      filterable: true,
+      render: (row: SalesInvoiceRow) => (
+        <Badge tone="primary">{row.kind === "CASH" ? d.salesKindCash : d.salesKindCredit}</Badge>
+      ),
+    },
+    {
+      id: "customer",
+      header: activeLocaleHeader(d.salesCustomer),
+      accessor: (row: SalesInvoiceRow) => customerNameById.get(row.customerId) ?? row.customerId,
+    },
+    {
+      id: "date",
+      header: activeLocaleHeader(d.salesInvoiceDate),
+      accessor: (row: SalesInvoiceRow) => row.invoiceDate,
+      sortable: true,
+    },
+    {
+      id: "due",
+      header: activeLocaleHeader(d.salesDueDate),
+      accessor: (row: SalesInvoiceRow) => row.dueDate,
+      sortable: true,
+    },
+    {
+      id: "net",
+      header: activeLocaleHeader(d.salesTotalNet),
+      accessor: (row: SalesInvoiceRow) => row.totalNet,
+      sortable: true,
+      render: (row: SalesInvoiceRow) => (
+        <span className="font-mono text-sm" dir="ltr">{row.totalNet}</span>
+      ),
+    },
+    {
+      id: "gross",
+      header: activeLocaleHeader(d.salesTotalGross),
+      accessor: (row: SalesInvoiceRow) => row.totalGross,
+      sortable: true,
+      render: (row: SalesInvoiceRow) => (
+        <span className="font-mono text-sm" dir="ltr">{row.totalGross}</span>
+      ),
+    },
+    {
+      id: "creditCheck",
+      header: activeLocaleHeader(d.salesCreditCheck),
+      accessor: (row: SalesInvoiceRow) => row.creditCheck?.decision ?? "—",
+      render: (row: SalesInvoiceRow) =>
+        row.creditCheck?.decision !== undefined && row.creditCheck.decision !== "" ? (
+          <CreditDecisionChip
+            decision={row.creditCheck.decision}
+            allowLabel={d.salesCreditAllow}
+            warnLabel={d.salesCreditWarn}
+            blockLabel={d.salesCreditBlock}
+          />
+        ) : (
+          "—"
+        ),
+    },
+    {
+      id: "status",
+      header: activeLocaleHeader(d.salesStatus),
+      accessor: (row: SalesInvoiceRow) => row.status,
+      sortable: true,
+      filterable: true,
+      render: (row: SalesInvoiceRow) => salesStatusLabel(d, row.status),
+    },
+    {
+      id: "quick",
+      header: activeLocaleHeader(d.rowActions),
+      accessor: () => "",
+      width: "6rem",
+      // key={row.id}: the virtualized grid reuses slot trees across window
+      // shifts — the per-row key forces a remount when the row changes so
+      // the timeline drawer's open state can never bleed across rows.
+      render: (row: SalesInvoiceRow) => (
+        <div key={row.id} className="flex items-center gap-1">
+          {canCreate && (
+            <span title={d.rowCopyConfirm}>
+              <Button
+                size="sm"
+                variant="ghost"
+                iconStart="copy"
+                aria-label={d.rowCopyToNew}
+                disabled={busy !== null}
+                onClick={() => void copyToNew(row.id)}
+              />
+            </span>
+          )}
+          <RecordTimeline locale={locale} entityKind="SALES_INVOICE" entityId={row.id} />
+        </div>
+      ),
+    },
+  ];
+
+  const shownColumns = invoiceColumns.filter(
+    (column) => column.id === "quick" || visibleColumns.includes(column.id),
+  );
+
+  const toolbarColumns = invoiceColumns
+    .filter((column) => column.id !== "quick")
+    .map((column) => ({ key: column.id, header: column.header.en }));
+
+  const bulkActions = useMemo(() => {
+    const actions: ("approve" | "post" | "void")[] = [];
+    if (canApprove) {
+      actions.push("approve");
+    }
+    if (canPost) {
+      actions.push("post");
+    }
+    if (canCreate) {
+      actions.push("void");
+    }
+    return actions;
+  }, [canApprove, canPost, canCreate]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -444,137 +639,112 @@ export function SalesInvoices({
       )}
 
       <Card title={d.salesInvoicesTitle}>
-        <DataTable
-          columns={[
-            {
-              id: "no",
-              header: activeLocaleHeader(d.salesInvoiceNo),
-              accessor: (row: SalesInvoiceRow) => row.invoiceNo ?? "—",
-              mono: true,
-              render: (row: SalesInvoiceRow) => (
-                <span className="font-mono text-sm" dir="ltr">{row.invoiceNo ?? "—"}</span>
-              ),
-            },
-            {
-              id: "kind",
-              header: activeLocaleHeader(d.salesKind),
-              accessor: (row: SalesInvoiceRow) => row.kind,
-              render: (row: SalesInvoiceRow) => (
-                <Badge tone="primary">{row.kind === "CASH" ? d.salesKindCash : d.salesKindCredit}</Badge>
-              ),
-            },
-            {
-              id: "customer",
-              header: activeLocaleHeader(d.salesCustomer),
-              accessor: (row: SalesInvoiceRow) => customerNameById.get(row.customerId) ?? row.customerId,
-            },
-            {
-              id: "date",
-              header: activeLocaleHeader(d.salesInvoiceDate),
-              accessor: (row: SalesInvoiceRow) => row.invoiceDate,
-            },
-            {
-              id: "due",
-              header: activeLocaleHeader(d.salesDueDate),
-              accessor: (row: SalesInvoiceRow) => row.dueDate,
-            },
-            {
-              id: "net",
-              header: activeLocaleHeader(d.salesTotalNet),
-              accessor: (row: SalesInvoiceRow) => row.totalNet,
-              render: (row: SalesInvoiceRow) => (
-                <span className="font-mono text-sm" dir="ltr">{row.totalNet}</span>
-              ),
-            },
-            {
-              id: "gross",
-              header: activeLocaleHeader(d.salesTotalGross),
-              accessor: (row: SalesInvoiceRow) => row.totalGross,
-              render: (row: SalesInvoiceRow) => (
-                <span className="font-mono text-sm" dir="ltr">{row.totalGross}</span>
-              ),
-            },
-            {
-              id: "creditCheck",
-              header: activeLocaleHeader(d.salesCreditCheck),
-              accessor: (row: SalesInvoiceRow) => row.creditCheck?.decision ?? "—",
-              render: (row: SalesInvoiceRow) =>
-                row.creditCheck?.decision !== undefined && row.creditCheck.decision !== "" ? (
-                  <CreditDecisionChip
-                    decision={row.creditCheck.decision}
-                    allowLabel={d.salesCreditAllow}
-                    warnLabel={d.salesCreditWarn}
-                    blockLabel={d.salesCreditBlock}
-                  />
-                ) : (
-                  "—"
-                ),
-            },
-            {
-              id: "status",
-              header: activeLocaleHeader(d.salesStatus),
-              accessor: (row: SalesInvoiceRow) => row.status,
-              render: (row: SalesInvoiceRow) => salesStatusLabel(d, row.status),
-            },
-          ]}
-          rows={[...invoices]}
-          rowKey={(row) => row.id}
-          rowActions={[
-            ...(canCreate
-              ? [
-                  {
-                    id: "submit",
-                    label: d.salesSubmit,
-                    onSelect: (row: SalesInvoiceRow) => {
-                      if (row.status !== "DRAFT") return;
-                      void action(row.id, "submit");
-                    },
-                  },
-                  {
-                    id: "cancel",
-                    label: d.salesCancel,
-                    onSelect: (row: SalesInvoiceRow) => {
-                      if (row.status === "POSTED" || row.status === "CANCELLED") return;
-                      setError(null);
-                      setNotice(null);
-                      setApproveId(null);
-                      setCancelReason("");
-                      setCancelId(row.id);
-                    },
-                  },
-                ]
-              : []),
-            ...(canApprove
-              ? [
-                  {
-                    id: "approve",
-                    label: d.salesApprove,
-                    onSelect: (row: SalesInvoiceRow) => {
-                      if (row.status !== "PENDING_APPROVAL") return;
-                      setError(null);
-                      setNotice(null);
-                      setCancelId(null);
-                      setOverrideCredit(false);
-                      setApproveId(row.id);
-                    },
-                  },
-                ]
-              : []),
-            ...(canPost
-              ? [
-                  {
-                    id: "post",
-                    label: d.salesPost,
-                    onSelect: (row: SalesInvoiceRow) => {
-                      if (row.status !== "APPROVED") return;
-                      void action(row.id, "post");
-                    },
-                  },
-                ]
-              : []),
-          ]}
-          empty={{ title: d.salesEmpty }}
+        <ListToolbar
+          locale={locale}
+          entityKind="SALES_INVOICE"
+          columns={toolbarColumns}
+          visibleColumns={visibleColumns}
+          onVisibleColumnsChange={setVisibleColumns}
+          filters={filters}
+          onApplyView={(view) => {
+            setVisibleColumns(
+              view.columns.length > 0
+                ? view.columns
+                : [...LIST_COLUMN_KEYS],
+            );
+            setFilters(view.filters);
+            setSort(
+              view.sort?.map((entry) => ({ columnId: entry.column, direction: entry.dir })) ?? [],
+            );
+          }}
+          exportPath="sales/sales-invoices/export"
+          canShare={canShareViews}
         />
+
+        <div className="mt-4">
+          <BulkActionsBar
+            locale={locale}
+            selectedIds={[...selected]}
+            onClear={() => {
+              setSelected(new Set());
+              void reloadInvoices();
+            }}
+            bulkPath="sales/sales-invoices/bulk"
+            actions={bulkActions}
+          />
+        </div>
+
+        <div className="mt-4">
+          <DataTable
+            columns={shownColumns}
+            rows={[...invoices]}
+            rowKey={(row) => row.id}
+            sort={sort}
+            onSortChange={setSort}
+            filters={filters}
+            onFilterChange={setFilters}
+            selected={selected}
+            onSelectedChange={setSelected}
+            selectionLabel={(count) => formatMessage(d.bulkSelected, { count })}
+            filterLabels={{ placeholder: d.listSearchLabel, clear: d.commonClear }}
+            rowActions={[
+              ...(canCreate
+                ? [
+                    {
+                      id: "submit",
+                      label: d.salesSubmit,
+                      onSelect: (row: SalesInvoiceRow) => {
+                        if (row.status !== "DRAFT") return;
+                        void action(row.id, "submit");
+                      },
+                    },
+                    {
+                      id: "cancel",
+                      label: d.salesCancel,
+                      onSelect: (row: SalesInvoiceRow) => {
+                        if (row.status === "POSTED" || row.status === "CANCELLED") return;
+                        setError(null);
+                        setNotice(null);
+                        setApproveId(null);
+                        setCancelReason("");
+                        setCancelId(row.id);
+                      },
+                    },
+                  ]
+                : []),
+              ...(canApprove
+                ? [
+                    {
+                      id: "approve",
+                      label: d.salesApprove,
+                      onSelect: (row: SalesInvoiceRow) => {
+                        if (row.status !== "PENDING_APPROVAL") return;
+                        setError(null);
+                        setNotice(null);
+                        setCancelId(null);
+                        setOverrideCredit(false);
+                        setApproveId(row.id);
+                      },
+                    },
+                  ]
+                : []),
+              ...(canPost
+                ? [
+                    {
+                      id: "post",
+                      label: d.salesPost,
+                      onSelect: (row: SalesInvoiceRow) => {
+                        if (row.status !== "APPROVED") return;
+                        void action(row.id, "post");
+                      },
+                    },
+                  ]
+                : []),
+            ]}
+            rowActionsLabel={d.rowActions}
+            empty={{ title: d.salesEmpty }}
+          />
+        </div>
         {/* §7 constraint: print/PDF arrives with PHASE-013 — honest disabled
             state, never a dead button that pretends. */}
         <div className="mt-3 flex flex-wrap items-center gap-2">

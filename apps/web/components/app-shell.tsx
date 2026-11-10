@@ -110,6 +110,10 @@ const FALLBACK_CRUMBS: Record<string, { group?: keyof Dictionary; label: keyof D
   notifications: { group: "navHome", label: "notificationsTitle" },
   // -- PHASE-015 T11 (3-a): the Industry & templates admin screen.
   "settings/templates": { group: "navSettings", label: "templatesTitle" },
+  // -- PHASE-036 (P36-W): the custom-fields manager (registry-driven when the
+  // navigation payload grows the settings row; fallback covers nav-fetch
+  // failure — the support-sessions rule, crumbs only).
+  "settings/custom-fields": { group: "navSettings", label: "cfTitle" },
   // -- PHASE-016 T10: the POS surfaces (registry-driven when the navigation
   // payload grows the pos group; fallback covers the in-between state).
   pos: { group: "posNavSection", label: "posNavCounter" },

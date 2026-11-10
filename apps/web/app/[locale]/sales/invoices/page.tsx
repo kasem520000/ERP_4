@@ -87,6 +87,7 @@ export default async function SalesInvoicesPage({
         canApprove={permissions.includes("sales.invoices.approve")}
         canOverrideCredit={permissions.includes("sales.credit_check.override")}
         canPost={permissions.includes("sales.invoices.post")}
+        canShareViews={permissions.includes("settings.views.share")}
       />
     );
   }

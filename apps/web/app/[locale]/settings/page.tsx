@@ -17,6 +17,7 @@ import { ErrorState } from "../../../components/client-ui";
 import { AppShell } from "../../../components/app-shell";
 import { Card } from "../../../components/card";
 import { ErrorNotice } from "../../../components/notices";
+import { LinkButton } from "../../../components/link-button";
 import { MfaPolicyCard, asMfaPolicy } from "../../../components/mfa-policy-card";
 import { ProfileForm } from "../../../components/profile-form";
 import { RetryButton } from "../../../components/retry-button";
@@ -89,6 +90,13 @@ export default async function SettingsPage({
             roles={roles.ok ? roles.data.tenantRoles : null}
           />
         )}
+        {/* PHASE-036 (P36-W): the custom-fields manager link — the settings
+            hub card pattern (title + description + LinkButton to the
+            sub-surface; reads are session-gated only, the manager itself
+            hides write affordances per permission). */}
+        <Card title={d.cfTitle} description={d.cfSubTitle} ariaLabel={d.cfTitle} className="w-full max-w-xl">
+          <LinkButton href={`/${locale}/settings/custom-fields`}>{d.cfTitle}</LinkButton>
+        </Card>
       </div>
     );
   }

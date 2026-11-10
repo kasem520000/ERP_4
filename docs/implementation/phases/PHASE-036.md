@@ -1,11 +1,14 @@
 # PHASE-036 — Extensibility Foundation: Custom Fields & Productivity (أساس المرونة)
 
-> **Status:** PLANNED — NOT STARTED · **Documented:** 2026-11-10 · **Program:**
+> **Status:** COMPLETE (2026-11-10 — see
+> [reports/PHASE-036-COMPLETION.md](reports/PHASE-036-COMPLETION.md)) · **Documented:**
+> 2026-11-10 · **Program:**
 > [Post-Roadmap Expansion Register v3.0](../../planning/POST_ROADMAP_EXPANSION_REGISTER.md)
 > (wave W1, tier P1) · **Source:** external gap analysis
 > `ERP_FULL_GAP_ANALYSIS.md` §25 (FD-01…FD-20) + this register's AD-36-10 ·
-> **Execution:** begins on the owner's explicit phase order; delivery =
-> `ERP_PLATFORM_PHASE036.zip`
+> **Execution:** begins on the owner's explicit phase order; delivered
+> 2026-11-10 as the GitHub commit/push to `kasem520000/ERP_4` (the owner's
+> standing instruction: the repository push replaces the archive hand-off)
 
 ## 1. Phase Overview
 

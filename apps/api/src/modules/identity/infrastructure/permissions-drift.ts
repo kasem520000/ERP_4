@@ -66,9 +66,39 @@ export function parseMatrixKeys(matrixMarkdown: string): string[] {
   return [...new Set(keys)].sort();
 }
 
-/** Extract the seeded keys from the permissions seed migration SQL. */
+/** Extract the seeded keys from the permissions seed migration SQL.
+ *
+ * PHASE-036: the parser is statement-scoped — only rows of an `INSERT INTO
+ * "permissions"` block count (the 0049 convention indents its VALUES rows
+ * two spaces, which the old line-anchored regex missed; scoping to the
+ * permissions statement also stops other tables' `('key', …)` rows — e.g.
+ * the industry-template seeds — from ever being misread as permissions).
+ * `--` section comments interleaved with the VALUES rows are skipped; the
+ * first non-comment, non-row line (ON CONFLICT / next statement) ends the
+ * block.
+ */
 export function parseSeedKeys(seedSql: string): string[] {
-  const keys = [...seedSql.matchAll(/^\('([a-z][a-z0-9_.-]+)',/gm)].map((m) => m[1]!);
+  const keys: string[] = [];
+  let inPermissionsInsert = false;
+  for (const rawLine of seedSql.split("\n")) {
+    const line = rawLine.trim();
+    if (/^INSERT INTO "permissions"\s/.test(line)) {
+      inPermissionsInsert = true;
+      continue;
+    }
+    if (!inPermissionsInsert) {
+      continue;
+    }
+    if (line.startsWith("--")) {
+      continue;
+    }
+    const row = line.match(/^\('([a-z][a-z0-9_.-]+)',/);
+    if (row) {
+      keys.push(row[1]!);
+      continue;
+    }
+    inPermissionsInsert = false;
+  }
   return [...new Set(keys)].sort();
 }
 
@@ -111,7 +141,9 @@ export function runDriftCheck(matrixMarkdown: string, seedSql: string): DriftRes
  * PHASE-016 0024 added the pos.* family; PHASE-018 0026 added the
  * manufacturing.* family; PHASE-019 0027 re-asserts the crm base set and
  * adds crm.contracts.bill + accounting.projects.manage): a key seeded
- * anywhere counts.
+ * anywhere counts. (PHASE-026…034 seeded their families into the 0004 base
+ * set at plan time — the two-site 0037/0038 precedent — so no extra list
+ * entries were needed until PHASE-036.)
  */
 const PERMISSION_SEED_MIGRATIONS: readonly string[] = [
   "apps/api/migrations/0004_permissions_seed.sql",
@@ -126,6 +158,10 @@ const PERMISSION_SEED_MIGRATIONS: readonly string[] = [
   // PHASE-023 T8: 0035 seeds sales.commerce.manage (the commerce-channel
   // import gate — operator-plane, granted to platform ops roles only).
   "apps/api/migrations/0035_external_integrations.sql",
+  // PHASE-036: 0049 seeds the §3.16 extensibility family (the three
+  // settings.* keys + the owner/accountant role grants) — the first phase
+  // whose permission keys are NOT pre-seeded in the 0004 base set.
+  "apps/api/migrations/0049_custom_fields_productivity.sql",
 ];
 
 export async function main(): Promise<void> {

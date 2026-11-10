@@ -240,6 +240,15 @@ const BUSINESS_KEYS: readonly string[] = [
   // through exactly these grants — the 0025/0026/0027/0038 fixture role.
   "crm.rental_contracts", "crm.contract_deposits",
   "crm.late_fees", "distribution.shipment_tracking",
+  // PHASE-036 transcription of the 0049 plan grants (the extensibility
+  // intake wave — platform.custom_fields / custom_picklists / saved_views /
+  // list_export / bulk_actions / record_timeline → business + enterprise,
+  // starter does NOT get them — the tier-4 posture): these are standalone
+  // platform-plane keys (no template REQUIRED chain consumes them), so
+  // their fixture role is the plan-grant drift check only.
+  "platform.custom_fields", "platform.custom_picklists",
+  "platform.saved_views", "platform.list_export",
+  "platform.bulk_actions", "platform.record_timeline",
 ];
 
 const ENTERPRISE_KEYS: readonly string[] = [

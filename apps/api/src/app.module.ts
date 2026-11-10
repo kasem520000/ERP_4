@@ -29,6 +29,9 @@ import { PurchasingModule } from "./modules/purchasing/purchasing.module";
 import { FixedAssetsModule } from "./modules/fixed_assets/fixed_assets.module";
 import { NotesModule } from "./modules/notes/notes.module";
 import { InstallmentsModule } from "./modules/installments/installments.module";
+// PHASE-036: the extensibility module (custom fields + picklists + saved
+// views + record comments/timeline — the extensibility backbone).
+import { ExtensibilityModule } from "./modules/extensibility/extensibility.module";
 // PHASE-028/029 (restored lineage): the budgeting + payroll modules.
 import { BudgetingModule } from "./modules/budgeting/budgeting.module";
 import { PayrollModule } from "./modules/payroll/payroll.module";
@@ -74,6 +77,7 @@ import { UsageLimitGuard } from "./infra/auth/usage-limit.guard";
     FixedAssetsModule,
     NotesModule,
     InstallmentsModule,
+    ExtensibilityModule,
     BudgetingModule,
     PayrollModule,
     ConsolidationModule,

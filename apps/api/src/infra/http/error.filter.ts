@@ -85,6 +85,21 @@ import {
   TierCodeDuplicateError,
   TierNotFoundError,
 } from "../../modules/distribution/domain/distribution-errors";
+// PHASE-036: the extensibility error family (§3.16) — not-founds map 404,
+// taken/in-use map 409, the rest ride the 422 default.
+import {
+  CustomFieldKeyTakenError,
+  CustomFieldNotFoundError,
+  CustomFieldHasValuesError,
+  PicklistInUseError,
+  PicklistKeyTakenError,
+  PicklistNotFoundError,
+  PicklistOptionValueTakenError,
+  PicklistOptionNotFoundError,
+  SavedViewNotFoundError,
+  SavedViewNotYoursError,
+  SavedViewNameTakenError,
+} from "../../modules/extensibility/domain/extensibility-errors";
 import { CommissionRunNotFoundError } from "../../modules/sales/commissions/domain/commission-errors";
 import {
   BomActiveExistsError,
@@ -667,6 +682,29 @@ function domainStatus(error: DomainError): number {
   // windows/quantities) fall through to the 422 default.
   if (error instanceof TierNotFoundError || error instanceof FreeGoodsRuleNotFoundError) {
     return HttpStatus.NOT_FOUND;
+  }
+  // PHASE-036: the extensibility not-founds (404; A7 parity).
+  if (
+    error instanceof CustomFieldNotFoundError ||
+    error instanceof PicklistNotFoundError ||
+    error instanceof PicklistOptionNotFoundError ||
+    error instanceof SavedViewNotFoundError
+  ) {
+    return HttpStatus.NOT_FOUND;
+  }
+  // PHASE-036: taken/in-use conflicts (409) + the ownership/share gate (403).
+  if (
+    error instanceof CustomFieldKeyTakenError ||
+    error instanceof CustomFieldHasValuesError ||
+    error instanceof PicklistKeyTakenError ||
+    error instanceof PicklistInUseError ||
+    error instanceof PicklistOptionValueTakenError ||
+    error instanceof SavedViewNameTakenError
+  ) {
+    return HttpStatus.CONFLICT;
+  }
+  if (error instanceof SavedViewNotYoursError) {
+    return HttpStatus.FORBIDDEN;
   }
   if (error instanceof TierCodeDuplicateError || error instanceof FreeGoodsRuleCodeDuplicateError) {
     return HttpStatus.CONFLICT;

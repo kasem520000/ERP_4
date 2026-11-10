@@ -84,8 +84,12 @@ marks a staged delivery. **Post-roadmap note (PHASE-035, 2026-11-10):** the firs
 post-roadmap gap-closure phase completed the CAPABILITY_MATRIX §3 pending intake —
 four keys (§13 ×3, §15 ×1) that carry the tier-4 grant posture (business +
 enterprise; starter blocked) exactly like the stage-9/10 financial-depth and
-template keys before them; the catalog total is now **176 feature keys (134 v1.1 +
-38 v2.0 + 4 PHASE-035 intake)** across the 22 modules.
+template keys before them; the catalog total is now **182 feature keys (134 v1.1 +
+38 v2.0 + 4 PHASE-035 intake + 6 PHASE-036 extensibility intake)** across the 22
+modules. **PHASE-036 (2026-11-10, migration 0049):** the §25 intake protocol's next
+wave — the extensibility & productivity family (six `platform.*` keys, §3 rows
+below) with the same tier-4 grant posture (business + enterprise; starter
+blocked) as the 0025/0026/0027/0037/0047 waves before it.
 
 ## 3. Module: platform
 
@@ -111,6 +115,12 @@ by the `tenancy`, `identity`, `audit`, `notifications`, and `files` modules.
 | `platform.notifications` | Notifications · الإشعارات | In-app inbox + email at MVP; SMS/push adapters later. Event-driven (invoice.overdue, stock.below_reorder, einvoice failures, sync rejections). **Split note (PHASE-014): the billing-critical subset shipped 014** — in-app inbox + preferences + owner emails for limit warnings, subscription state changes, invoice.overdue, stock.below_reorder, reconciliation/assertion failures; **PHASE-015 generalized the in-app leg** (category domains widened to `stock` + `templates`: BR-019 reorder digests, template upgrade offers — never auto-applied); e-invoice/sync event integrations and SMS/push adapters remain with their owning phases (023/020+) | MVP | 003 (email) / 014 (billing-critical in-app) / 015 (generalized in-app) | `platform.notifications.manage` | — |
 | `platform.files` | Attachments & files · المرفقات | Tenant-scoped file objects (receipts, contracts, exports) with signed URLs and upload validation | MVP | 002 (infra) / 006 (usage) | `platform.files.upload` | — |
 | `platform.data_export` | Tenant data export · تصدير بيانات المستأجر | Full structured export (JSON + CSV per entity + document PDFs) used for offboarding and on-demand download | MVP | 014 | `platform.tenants.manage` | `platform.tenant_lifecycle` | *(marker corrected 004→014 per PHASE-004 §2: the export/offboarding flows land with the PHASE-014 billing/offboarding work; the `tenancy.export.request`/`tenancy.offboarding.execute` permissions exist in the PHASE-003 seed — corrected at PHASE-004 completion)* |
+| `platform.custom_fields` | Custom fields · الحقول المخصصة | **SHIPPED PHASE-036** (migration 0049; FD-18): tenant-defined fields over the closed 11-entity-kind list — six typed value families (TEXT/NUMBER/MONEY NUMERIC(19,4)/DATE/BOOLEAN/SELECT-with-picklist), bilingual labels/help, per-family validation, show-in-list cap; INV-027: data dimensions only, never posting surfaces (the contracts forbidden-stem machine check) | 1 | 036 | `settings.custom_fields.manage` | — |
+| `platform.custom_picklists` | Custom picklists · قوائم الخيارات المخصصة | **SHIPPED PHASE-036** (FD-20): tenant-managed bilingual option sets consumed by SELECT-type custom fields — stable value codes, sort, active/inactive without delete (historical values keep resolving) | 1 | 036 | `settings.picklists.manage` | `platform.custom_fields` |
+| `platform.saved_views` | Saved list views · طرق العرض المحفوظة | **SHIPPED PHASE-036** (FD-02/FD-03): per-user or shared list views — columns/filters/sort jsonb snapshots + the default flag; publishing a shared view requires `settings.views.share` (the §3.16 rename record) | 1 | 036 | self (personal) / `settings.views.share` (shared) | — |
+| `platform.list_export` | List export · تصدير القوائم | **SHIPPED PHASE-036** (FD-04): server-side csv/xlsx export on the reference trade lists (sales invoices, supplier invoices, journal entries) honoring current filters + visible columns — never a client-side grid dump | 1 | 036 | entity's view key (e.g. `sales.invoices.view`) | — |
+| `platform.bulk_actions` | Bulk actions · الإجراءات الجماعية | **SHIPPED PHASE-036** (FD-01): batch approve/post/void over the EXISTING lifecycle services with the per-row report envelope (partial failure reported, never silent; re-runs idempotent per row); per-ACTION permission re-check, no new keys | 1 | 036 | entity's existing approve/post/create keys | — |
+| `platform.record_timeline` | Record timeline & comments · سجل النشاط والملاحظات | **SHIPPED PHASE-036** (FD-14/FD-15): the per-record timeline (audit_events + the append-only 🔒 record_comments store composed newest-first) + @uuid mentions stored data-only (delivery rides PHASE-052's fabric, no fabrication) | 1 | 036 | self (every authenticated member) | — |
 
 ## 4. Module: accounting
 

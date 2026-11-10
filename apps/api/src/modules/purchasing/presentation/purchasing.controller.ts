@@ -1,12 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Post, Query, Req } from "@nestjs/common";
-import type { Request } from "express";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Post, Query, Req, Res } from "@nestjs/common";
+import type { Request, Response } from "express";
 import { z } from "zod";
 
+import { bulkActionRequestSchema } from "@erp/contracts";
+
 import { identityOf, type SessionContext } from "../../../infra/context/session-context";
-import { UnauthenticatedError } from "../../identity/api/identity";
+import { ForbiddenError, UnauthenticatedError } from "../../identity/api/identity";
 import { RequirePermissions } from "../../../infra/auth/require-permissions.decorator";
 import { RequireFeature } from "../../../infra/auth/require-feature.decorator";
 import { envelope } from "../../../infra/http/envelope";
+import { executeBulk } from "../../extensibility/application/bulk-actions";
+import { cell, toCsv, toXlsx, type ExportColumn } from "../../extensibility/application/list-export";
 import { PurchaseRequestService, PurchaseOrderService } from "../application/orders";
 import { GoodsReceiptService } from "../application/goods-receipts";
 import { SupplierInvoiceService } from "../application/supplier-invoices";
@@ -131,6 +135,9 @@ const createInvoiceSchema = z.object({
   poId: UUID.nullable().optional(),
   note: z.string().min(1).max(500).nullable().optional(),
   noteAr: z.string().min(1).max(500).nullable().optional(),
+  // PHASE-036 (AD-36-10): the audited operator decision on a duplicate-triple
+  // block — the service records purchasing.duplicate_check.proceeded.
+  proceedAnyway: z.boolean().optional(),
   lines: z.array(invoiceLineSchema).min(1).max(200),
 });
 
@@ -605,6 +612,110 @@ export class PurchasingController {
     const identity = requireIdentity(request);
     const { reason } = reasonSchema.parse(body);
     return envelope(this.invoices.cancel(id, reason, identity.userId));
+  }
+
+  // -- PHASE-036 productivity surfaces (bulk / export) -----------------------------------
+
+  /**
+   * PHASE-036 T36-4 (FD-01): bulk approve/post/void over the EXISTING
+   * lifecycle service — per-row report envelope (partial failure reported,
+   * never silent). Per-ACTION key re-check (approve/post keys stronger than
+   * the route's create-level row — matrix §3.16 note).
+   */
+  @Post("supplier-invoices/bulk")
+  @RequirePermissions("purchasing.supplier_invoices.create")
+  @RequireFeature("platform.bulk_actions")
+  async bulkInvoices(@Req() request: Request, @Body() body: unknown) {
+    const identity = requireIdentity(request);
+    const input = bulkActionRequestSchema.parse(body);
+    const actionPermissions: Record<string, string> = {
+      approve: "purchasing.supplier_invoices.approve",
+      post: "purchasing.supplier_invoices.post",
+      void: "purchasing.supplier_invoices.create",
+    };
+    const required = actionPermissions[input.action];
+    if (required === undefined || identity.permissions?.has(required) !== true) {
+      throw new ForbiddenError(required ?? `purchasing.supplier_invoices.${input.action}`);
+    }
+    return envelope(
+      await executeBulk(input.action, input.ids, ({ id }) => {
+        if (input.action === "approve") {
+          return this.invoices.approve(id, identity.userId);
+        }
+        if (input.action === "post") {
+          return this.invoices.post(id, identity.userId);
+        }
+        return this.invoices.cancel(id, "BULK_VOID", identity.userId);
+      }),
+    );
+  }
+
+  /**
+   * PHASE-036 T36-5 (FD-04): the supplier-invoice list export (csv/xlsx,
+   * server-side, filters + visible columns honored — never a client-side
+   * grid dump).
+   */
+  @Get("supplier-invoices/export")
+  @RequirePermissions("purchasing.supplier_invoices.view")
+  @RequireFeature("platform.list_export")
+  async exportInvoices(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Query("status") status?: string,
+    @Query("supplierId") supplierId?: string,
+    @Query("format") format?: string,
+    @Query("columns") columns?: string,
+  ) {
+    requireIdentity(request);
+    const rows = await this.invoices.list({ status, supplierId, limit: 2000 });
+    const allColumns: ExportColumn[] = [
+      { key: "invoiceNo", header: "Supplier Invoice No" },
+      { key: "internalNo", header: "Internal No" },
+      { key: "invoiceDate", header: "Date" },
+      { key: "dueDate", header: "Due" },
+      { key: "supplierId", header: "Supplier" },
+      { key: "currencyCode", header: "Currency" },
+      { key: "totalNet", header: "Net" },
+      { key: "totalTax", header: "Tax" },
+      { key: "totalGross", header: "Gross" },
+      { key: "matchStatus", header: "Match" },
+      { key: "status", header: "Status" },
+    ];
+    const selected = (columns ?? "")
+      .split(",")
+      .map((column) => column.trim())
+      .filter((column) => column.length > 0);
+    const exportColumns = selected.length > 0
+      ? allColumns.filter((column) => selected.includes(column.key))
+      : allColumns;
+    const sheet = {
+      name: "supplier-invoices",
+      columns: exportColumns,
+      rows: rows.map((row) => ({
+        invoiceNo: cell(row.invoiceNo),
+        internalNo: cell(row.internalNo),
+        invoiceDate: cell(row.invoiceDate),
+        dueDate: cell(row.dueDate),
+        supplierId: cell(row.supplierId),
+        currencyCode: cell(row.currencyCode),
+        totalNet: cell(row.totalNet),
+        totalTax: cell(row.totalTax),
+        totalGross: cell(row.totalGross),
+        matchStatus: cell(row.matchStatus),
+        status: cell(row.status),
+      })),
+    };
+    const stamp = new Date().toISOString().slice(0, 10);
+    if (format === "xlsx") {
+      const buffer = await toXlsx([sheet]);
+      response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      response.header("Content-Disposition", `attachment; filename="supplier-invoices-${stamp}.xlsx"`);
+      response.status(200).send(buffer);
+    } else {
+      response.header("Content-Type", "text/csv; charset=utf-8");
+      response.header("Content-Disposition", `attachment; filename="supplier-invoices-${stamp}.csv"`);
+      response.status(200).send(toCsv(sheet));
+    }
   }
 
   // -- debit notes ------------------------------------------------------------------------

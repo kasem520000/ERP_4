@@ -10,7 +10,15 @@
  * manual narrowing helpers live next to the types they narrow.
  */
 
-import type { IndustryTemplateManifest } from "@erp/contracts";
+import type {
+  CustomFieldEntityKind,
+  CustomFieldType,
+  IndustryTemplateManifest,
+} from "@erp/contracts";
+
+// Re-exported for the app-side row interfaces below (the closed lists the
+// PHASE-036 surfaces key on — a single contracts source of truth).
+export type { CustomFieldEntityKind, CustomFieldType };
 
 export const SESSION_COOKIE = "erp_session";
 export const CSRF_COOKIE = "erp_csrf";
@@ -4705,4 +4713,131 @@ export interface ConsolidationSnapshot {
     compared: { left: string; right: string };
     brokenLines: string[];
   };
+}
+
+// -- PHASE-036 extensibility & productivity (custom fields / picklists /
+// saved views / comments / timeline / bulk) ---------------------------------
+// Mirrors packages/contracts/src/platform/custom-fields.ts (the wire DTOs),
+// hand-written per this file's ADR-0003 convention: plain interfaces, string
+// dates, decimal money/number values stay strings (never Number()).
+
+/** Per-family validation jsonb shape (all keys optional; per-type relevant). */
+export interface CustomFieldValidationRow {
+  /** TEXT only. */
+  regex?: string;
+  /** NUMBER/MONEY only — canonical decimal strings. */
+  min?: string;
+  max?: string;
+  /** DATE only — inclusive ISO bounds. */
+  minDate?: string;
+  maxDate?: string;
+}
+
+/** GET/POST/PATCH/DELETE /settings/custom-fields → rows. */
+export interface CustomFieldDefinitionRow {
+  id: string;
+  entityKind: CustomFieldEntityKind;
+  key: string;
+  label: string;
+  labelAr: string;
+  type: CustomFieldType;
+  picklistId: string | null;
+  required: boolean;
+  defaultValue: unknown;
+  validation: CustomFieldValidationRow | null;
+  helpText: string | null;
+  helpTextAr: string | null;
+  showInList: boolean;
+  sort: number;
+  isActive: boolean;
+  /** The referenced picklist (SELECT only) — resolved for the manager UI. */
+  picklist?: { id: string; key: string; name: string; nameAr: string } | null;
+}
+
+/** One wire value entry (the family is carried per entry — total writes). */
+export interface CustomFieldValueWire {
+  type: CustomFieldType;
+  value: unknown;
+}
+
+/** GET /settings/custom-fields/values → data (entityId → fieldKey → value). */
+export type CustomFieldValuesMap = Record<string, Record<string, CustomFieldValueWire>>;
+
+/** One picklist option row. */
+export interface CustomPicklistOptionRow {
+  id: string;
+  value: string;
+  label: string;
+  labelAr: string;
+  sort: number;
+  isActive: boolean;
+}
+
+/** GET/POST/PATCH/DELETE /settings/picklists → rows (options resolved in). */
+export interface CustomPicklistRow {
+  id: string;
+  key: string;
+  name: string;
+  nameAr: string;
+  isActive: boolean;
+  options: CustomPicklistOptionRow[];
+}
+
+/** GET/POST/PATCH/DELETE /settings/views → rows (userId null = shared). */
+export interface SavedViewRow {
+  id: string;
+  entityKind: CustomFieldEntityKind;
+  userId: string | null;
+  name: string;
+  columns: string[];
+  filters: Record<string, unknown>;
+  sort: { column: string; dir: "asc" | "desc" }[] | null;
+  isDefault: boolean;
+}
+
+/** One timeline entry (audit event or comment, newest-first). */
+export type TimelineEntryRow =
+  | {
+      kind: "audit";
+      id: string;
+      at: string;
+      actorId: string | null;
+      action: string;
+      after: unknown;
+    }
+  | {
+      kind: "comment";
+      id: string;
+      at: string;
+      actorId: string | null;
+      body: string;
+      mentions: string[];
+    };
+
+/** GET/POST /extensibility/comments → rows. */
+export interface RecordCommentRow {
+  id: string;
+  entityKind: CustomFieldEntityKind;
+  entityId: string;
+  authorId: string;
+  authorName: string | null;
+  body: string;
+  mentions: string[];
+  createdAt: string;
+}
+
+/** One per-row outcome inside POST :module/bulk results (partial failure reported). */
+export interface BulkRowOutcomeRow {
+  id: string;
+  ok: boolean;
+  error: { code: string; message?: string } | null;
+}
+
+/** POST sales/sales-invoices/bulk → data (the per-row report envelope). */
+export interface BulkActionResultRow {
+  action: string;
+  requested: number;
+  succeeded: number;
+  failed: number;
+  results: BulkRowOutcomeRow[];
 }

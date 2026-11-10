@@ -192,6 +192,15 @@ are pre-registered at blueprint level per [../EXPANSION_REGISTER.md](../EXPANSIO
 | `loan_status` | ACTIVE, CLOSED, WRITE_OFF | employee_loans | 029 |
 | `loan_line_status` | PENDING, DEDUCTED, WAIVED | employee_loan_lines | 029 |
 | `consolidation_run_status` | QUEUED, RUNNING, COMPLETED, FAILED | consolidation_runs | 034 |
+| `custom_field_type` | TEXT, NUMBER, MONEY, DATE, BOOLEAN, SELECT | custom_field_definitions (immutable spine) + custom_field_values (snapshot) | 036 |
+| `custom_field_entity_kind` | PARTNER, ITEM, SALES_QUOTATION, SALES_ORDER, SALES_INVOICE, PURCHASE_ORDER, SUPPLIER_INVOICE, JOURNAL_ENTRY, FIXED_ASSET, EMPLOYEE, EXPENSE — the CLOSED extensibility anchor list (contracts `CUSTOM_FIELD_ENTITY_KINDS` mirror, cell-for-cell) | custom_field_definitions, custom_field_values, saved_views, record_comments | 036 |
+
+PHASE-036 note (§9): the typed value families are COLUMN-shaped, not enum-shaped —
+`custom_field_values` carries one nullable column per family
+(`value_text` / `value_number` numeric(28,10) / `value_money` numeric(19,4) /
+`value_date` / `value_boolean` / `value_picklist_option_id`) with the
+`ck_custom_field_values_typed_family` one-column invariant; the picklist
+option `value` codes follow the `^[a-z0-9][a-z0-9_-]{0,59}$` code format (§12).
 
 ## 10. `memo` vs `description`
 

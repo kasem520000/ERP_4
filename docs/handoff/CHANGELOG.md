@@ -4,6 +4,64 @@
 
 Format: `DATE — item — type` where type ∈ {BLUEPRINT, PHASE-NNN, DOCS, BREAKING-ARCH, DECISION}.
 
+- 2026-11-10 — **PHASE-036 — EXTENSIBILITY FOUNDATION: CUSTOM FIELDS &
+  PRODUCTIVITY (أساس المرونة: الحقول المخصصة والإنتاجية) — the post-roadmap
+  expansion program v3.0's first executed phase (wave W1, tier P1; closes
+  FD-01/02/03/04/06/07/08/14/15/16/18/20 + AD-36-10)**: the platform's missing
+  extensibility backbone — the layer that lets two tenants run two different
+  businesses on the same release. **Migration 0049** (schema_version 49): the six
+  tenant-owned RLS'd tables — `custom_picklists` + `custom_picklist_options`
+  (FD-20 tenant-managed bilingual option sets), `custom_field_definitions` +
+  `custom_field_values` (FD-18: the closed 11-entity-kind list, six typed value
+  families with the one-family CHECK invariant, MONEY numeric(19,4) per
+  ADR-0009, validation jsonb, show-in-list cap), `saved_views` (FD-02/FD-03
+  per-user/shared list snapshots with the COALESCE-unique name space), and
+  `record_comments` 🔒 (FD-15, append-only via the guard trigger, @uuid mentions
+  data-only until PHASE-052's delivery fabric) — plus the three §3.16 permission
+  seeds (`settings.custom_fields.manage` / `settings.picklists.manage` /
+  `settings.views.share` — the phase doc's `platform.views.manage` projection
+  landed on the tenant settings plane per the matrix §3.10 rule, the rename
+  recorded) and the six `platform.*` feature-key plan grants (business +
+  enterprise; starter blocked — tier-4). **The `extensibility` API module**:
+  definitions/picklists CRUD + the values read/write plane (tenant-UoW, typed
+  fail-closed errors, definition-key closed catalog) + saved-views (personal
+  self-plane; shared publish double-gated) + comments/timeline
+  (`GET /api/v1/extensibility/timeline` — audit_events + record_comments
+  composed newest-first; the evaluation's "audit exists but no screen shows it"
+  closed). **The productivity suite**: the `executeBulk` convention (FD-01 —
+  per-row report envelope, partial failure never silent, idempotent re-runs)
+  on the first three surfaces (sales/supplier invoices + journal entries:
+  approve/post/void over their EXISTING lifecycle services, per-ACTION
+  permission re-check); server-side csv/xlsx list export (FD-04 — RFC 4180 +
+  exceljs, filters + visible columns honored, the dedicated binary-safe BFF
+  streaming route); copy-to-new on the sales document family (FD-08 — a fresh
+  DRAFT, never a posted doc, never inheriting delivery/order linkage); and the
+  duplicate supplier-invoice detection upgrade (AD-36-10): the full match key
+  (tenant, supplier, number, **currency**, amount) + the
+  `purchasing.duplicate_invoice_tolerance_pct` SETTINGS key (0–10%, default 0 =
+  the pre-036 exact semantics — backward compatible) + the warning LIST riding
+  the typed error + **proceed-anyway** with its own audited
+  `purchasing.duplicate_check.proceeded` row (never a silent block). **INV-027
+  (new invariant, machine-checked)**: custom fields never post — the contracts
+  forbidden-stem test walks every posting/tax DTO schema and scans the engine
+  sources (the healthcare no-clinical gate pattern). **Web**: the
+  `/{locale}/settings/custom-fields` manager (the 146th screen — entity-kind
+  tabs, definition CRUD with per-type validation, the picklists plane) + the
+  generic list-toolbar (column chooser + saved views + export),
+  bulk-actions-bar, and record-timeline drawer wired into the sales-invoices
+  reference screen — the mandated pattern for the later domain phases.
+  **+131 i18n keys → ar=en=4,417.** Verification: contracts 82/82 (the
+  custom-fields + INV-027 specs); apps/api 43 files / 500 tests ALL PASS;
+  migrations journal 49; permissions drift 248=248 (the drift parser upgraded
+  statement-scoped); golden effective-configs 44/44 after the in-phase re-pin
+  (the SETTINGS wave moved all 40 pins — old→new table in
+  agent-ctx/P36-goldens-repin.md); validate:docs 29/29; web typecheck zero
+  errors across apps/web + web unit tests 73/73 (the clean workspace install
+  resolved both long-standing dual-React sandbox artifacts); the __db__ suites (167 files with the new extensibility
+  pack) on the live harness exactly as before. Delivery (per the owner's instruction): the tree + this changelog committed
+  and pushed to the GitHub repository kasem520000/ERP_4 (the phase-per-commit
+  workflow) — the repository push replaces the archive hand-off this phase.
+
 - 2026-11-10 — **POST-ROADMAP EXPANSION v3.0 REGISTERED — the Comprehensive-ERP
   Program (PHASE-036…PHASE-058 planned; zero code shipped — a documentation-only
   revision)**: the owner forwarded a second, independent external review of the

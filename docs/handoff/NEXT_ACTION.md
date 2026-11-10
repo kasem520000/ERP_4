@@ -1,34 +1,33 @@
 # Next Action
 
-> **Status:** LIVING DOCUMENT — updated at every phase completion · **Updated:** 2026-11-10 (expansion v3.0 registered)
+> **Status:** LIVING DOCUMENT — updated at every phase completion · **Updated:** 2026-11-10 (PHASE-036 executed — the expansion program's first phase)
 
 ## The single next action
 
-**PHASE-035 is COMPLETE (2026-11-10) — the 34-phase roadmap is finished AND the
-first post-roadmap gap-closure phase is shipped** (evidence:
-[../implementation/phases/reports/PHASE-035-COMPLETION.md](../implementation/phases/reports/PHASE-035-COMPLETION.md):
-the public marketing landing page `/{locale}/welcome` · the platform control-panel
-dashboard `/{locale}/platform/overview` · the THIRTEENTH industry template
-`industry.rental_logistics` · the a4-payslip print template — the four gaps the
-user's review of `ERP_PLATFORM_PHASE034.zip` found, closed; CURRENT_SHIPPED_PHASE
-034 → 035; migrations 0001–0048).
+**PHASE-036 is COMPLETE (2026-11-10) — the post-roadmap expansion program v3.0's
+first executed phase: the extensibility backbone is shipped** (evidence:
+[../implementation/phases/reports/PHASE-036-COMPLETION.md](../implementation/phases/reports/PHASE-036-COMPLETION.md):
+the custom-fields engine (definitions + typed values + picklists, INV-027
+machine-checked) · saved views · the bulk/export/copy-to-new productivity suite
+on the reference trade lists · the record timeline + comments 🔒 · the
+duplicate-invoice tolerance with audited proceed-anyway · the 146th screen
+`/{locale}/settings/custom-fields`; migrations 0001–0049; permissions 248=248;
+i18n 4,417=4,417; golden pins re-pinned 44/44; CURRENT_SHIPPED_PHASE 035 → 036).
+The tree is committed and pushed to the GitHub repository
+`kasem520000/ERP_4` (the phase-per-commit delivery workflow).
 
-**NEXT ELIGIBLE: PHASE-036 — Extensibility Foundation: Custom Fields &
-Productivity (أساس المرونة: الحقول المخصصة والإنتاجية), on the owner's explicit
-execution order.** The post-roadmap expansion v3.0 program is now REGISTERED
-(2026-11-10): a second external review (three uploaded reports — conformance
-audit + maturity verdict + the 495-gap capability analysis) was reconciled
-against the shipped tree and became the binding plan
-[../planning/POST_ROADMAP_EXPANSION_REGISTER.md](../planning/POST_ROADMAP_EXPANSION_REGISTER.md)
-— **23 planned phases PHASE-036…PHASE-058** toward a comprehensive ERP
-("متكامل بكل ما تعني الكلمة"), each with its canonical 8-section phase
-document under `docs/implementation/phases/` (status: PLANNED — NOT STARTED;
-PHASE-058 AI is PROPOSED/decision-gated). **Delivery discipline: the owner says
-"begin PHASE-03NN" (this conversation or a fresh one with the
-`ERP_PLATFORM_PHASE035.zip` archive attached) → the phase executes end-to-end
+**NEXT ELIGIBLE: PHASE-037 — Master-Data Depth & Activation Residue (تعميق
+البيانات الأساسية وسدّ بقايا التفعيل), on the owner's explicit execution
+order.** The register's W1 wave order is 036 → 037 → 038 → 039 (foundation),
+then W2–W5 per its §1.1 table. **Delivery discipline: the owner says "begin
+PHASE-03NN" (this conversation or a fresh one with the
+`ERP_PLATFORM_PHASE036.zip` archive attached) → the phase executes end-to-end
 (migration + contracts + api suite + web screens + docs + completion report) →
-delivery = `ERP_PLATFORM_PHASE03NN.zip`.** The register's W1 wave order is
-036 → 037 → 038 → 039 (foundation), then W2–W5 per its §1.1 table.
+delivery = a commit+push to the GitHub repository `kasem520000/ERP_4` (the
+owner's standing instruction from PHASE-036 on: the repository push replaces
+the archive hand-off; an `ERP_PLATFORM_PHASE03NN.zip` is produced only on
+explicit request — the repo tree at the phase commit is the byte-equivalent
+source).**
 
 **The standing external/infra-gated ledger (unchanged; a documented INCOMPLETE
 beats a fabricated pass — directive §1.10–1.11):**

@@ -8,7 +8,7 @@ import { SelfApprovalBlockedError } from "../../accounting/domain/accounting-err
 import type { JournalLineSpec, JournalSpec } from "../../accounting/domain/posting-engine/journal-spec";
 import { TaxResolverService } from "../../tax/application/tax-resolver-service";
 import { recordDocumentTaxSummary } from "../../tax/application/posting-adapter";
-import { ownTenantBaseCurrency } from "../../../infra/settings/setting-reader";
+import { ownTenantBaseCurrency, readEffectiveSetting } from "../../../infra/settings/setting-reader";
 import * as store from "../infrastructure/purchasing.store";
 import {
   DuplicateSupplierInvoiceError,
@@ -21,6 +21,7 @@ import {
 } from "../domain/purchasing-errors";
 import { requireSupplier } from "./orders";
 import { MatchingService, type MatchDispositionInput } from "./matching";
+import { classifyDuplicateCandidates } from "./duplicate-check";
 import { resolveInputTaxLines, type PurchasingTaxLine } from "./tax-lines";
 
 /**
@@ -103,6 +104,10 @@ export class SupplierInvoiceService {
     note: string | null;
     noteAr: string | null;
     actorId: string | null;
+    /** PHASE-036 (AD-36-10): the operator's audited proceed-anyway decision
+     *  on a duplicate-triple block — false/absent = the typed error carries
+     *  the warning list for the dialog. */
+    proceedAnyway?: boolean;
     lines: readonly InvoiceLineInput[];
   }): Promise<store.SupplierInvoiceRow> {
     if (input.lines.length === 0) throw new EmptyDocumentError("supplier invoice");
@@ -265,31 +270,58 @@ export class SupplierInvoiceService {
     const totalTaxS = totalTax.toDecimalPlaces(4, Decimal.ROUND_HALF_UP).toFixed(4);
     const totalGross = totalNet.plus(totalTax).toDecimalPlaces(4, Decimal.ROUND_HALF_UP).toFixed(4);
 
-    // BR-011 duplicate semantics: same triple → block (default) / warn; same
-    // number different amount → always warn (recorded on the draft).
-    const duplicate = await store.findInvoiceDuplicate({
+    // PHASE-036 T36-7 (AD-36-10): BR-011 semantics widened — the full match
+    // key (tenant, supplier, number, CURRENCY, amount) with the configurable
+    // tolerance (purchasing.duplicate_invoice_tolerance_pct, the 028/029
+    // SETTINGS wave). The WARNING LIST rides the typed error (the dialog's
+    // data) and the draft row; "proceed anyway" is an OPERATOR decision with
+    // an audit row (never a silent block); the (supplier, number)
+    // different-amount case still warns on the draft.
+    const tolerancePct = await readEffectiveSetting<number>("purchasing.duplicate_invoice_tolerance_pct");
+    const candidates = await store.findInvoiceDuplicates({
       supplierId: input.supplierId,
       invoiceNo: input.invoiceNo,
-      totalGross,
     });
+    const warnings = classifyDuplicateCandidates(
+      { amount: totalGross, currency: input.currencyCode },
+      candidates,
+      tolerancePct,
+    );
+    const triple = warnings.find((warning) => warning.kind === "triple");
     let duplicateWarning: Record<string, unknown> | null = null;
-    if (duplicate !== undefined) {
-      if (duplicate.kind === "triple") {
-        const behavior = (await store.readSetting<"block" | "warn">("purchasing.duplicate_invoice_behavior")) ?? "block";
-        if (behavior === "block") {
-          throw new DuplicateSupplierInvoiceError({
-            supplierId: input.supplierId,
-            invoiceNo: input.invoiceNo,
-            amount: totalGross,
-            existingId: duplicate.existingId,
-          });
-        }
+    let duplicateProceeded = false;
+    if (triple !== undefined) {
+      const behavior = (await store.readSetting<"block" | "warn">("purchasing.duplicate_invoice_behavior")) ?? "block";
+      if (behavior === "block" && input.proceedAnyway !== true) {
+        // Fail-closed WITH the full warning list in the typed error details —
+        // the UI renders the dialog, the operator decides.
+        throw new DuplicateSupplierInvoiceError({
+          supplierId: input.supplierId,
+          invoiceNo: input.invoiceNo,
+          amount: totalGross,
+          existingId: triple.existingId,
+          warnings,
+        });
       }
+      if (behavior === "block" && input.proceedAnyway === true) {
+        // The audited operator decision: proceed anyway (the audit row is
+        // the proceed-anyway trail the phase contract names).
+        duplicateProceeded = true;
+      }
+    }
+    if (warnings.length > 0) {
+      const first = warnings[0]!;
       duplicateWarning = {
-        kind: duplicate.kind,
-        existingId: duplicate.existingId,
-        existingAmount: duplicate.existingAmount,
-        existingDate: duplicate.existingDate,
+        kind: first.kind,
+        existingId: first.existingId,
+        existingAmount: first.existingAmount,
+        existingDate: first.existingDate,
+        // The PHASE-036 additive widenings (backward compatible — the
+        // PHASE-011 DB pins keep kind/existingId/existingAmount/existingDate):
+        existingCurrency: first.existingCurrency,
+        warnings,
+        proceeded: duplicateProceeded,
+        checkedWithTolerancePct: tolerancePct,
       };
     }
 
@@ -326,6 +358,22 @@ export class SupplierInvoiceService {
         duplicateWarning,
       },
     });
+    if (duplicateProceeded) {
+      // The proceed-anyway trail (AD-36-10's "an operator decision with an
+      // audit row" — a distinct, searchable audit action).
+      await this.audit.record({
+        action: "purchasing.duplicate_check.proceeded",
+        entityType: "supplier_invoice",
+        entityId: created.id,
+        actorId: input.actorId ?? undefined,
+        after: {
+          invoiceNo: input.invoiceNo,
+          supplierId: input.supplierId,
+          amount: totalGross,
+          warnings: warnings.map((warning) => warning.existingId),
+        },
+      });
+    }
     return created;
   }
 

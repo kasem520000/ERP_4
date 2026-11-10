@@ -78,7 +78,7 @@ web screens + docs + completion report).
 
 | Phase (ID) | Title (EN / AR) | Tier | Depends on | Closes (external IDs) | Est. |
 |---|---|---|---|---|---|
-| **PHASE-036** | Extensibility Foundation: Custom Fields & Productivity / أساس المرونة: الحقول المخصصة والإنتاجية | P1 | — | H-18¹, FD-01…FD-10, FD-14…FD-16, FD-18, FD-20, AD-36-10 | 3 wks |
+| **PHASE-036** ✅ | Extensibility Foundation: Custom Fields & Productivity / أساس المرونة: الحقول المخصصة والإنتاجية — **SHIPPED 2026-11-10** (the first executed phase of this program; evidence: [PHASE-036-COMPLETION.md](../implementation/phases/reports/PHASE-036-COMPLETION.md)) | P1 | — | H-18¹, FD-01…FD-10, FD-14…FD-16, FD-18, FD-20, AD-36-10 | 3 wks |
 | **PHASE-037** | Master-Data Depth & Activation Residue / تعميق البيانات الأساسية وسدّ بقايا التفعيل | P1 | 036 | F-1, F-2, F-5, F-6, F-7², F-9², EVAL §9c-9/10/14, H-17, I-16, I-18, AD-36-02/03/04 | 3 wks |
 | **PHASE-038** | Brand & Document Engine v2 / محرك العلامة والمستندات (الطباعة القابلة للتخصيص) | P1 | 036 | H-02, FD-21, FD-22, FD-24…FD-30, TB-03, UX-02, PP-26 | 3 wks |
 | **PHASE-039** | Workflow Engine & Approval Orchestration / محرك سير العمل والموافقات متعددة المستويات | P1 | 036 | H-14, W-01…W-12, PP-17 | 4 wks |

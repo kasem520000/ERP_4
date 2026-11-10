@@ -217,6 +217,21 @@ export const MIGRATIONS: readonly string[] = [
   // tenant-identifying rows cross the boundary; revoked from PUBLIC, granted
   // to erp_app).
   "0048_platform_overview",
+  // PHASE-036: 0049_custom_fields_productivity.sql (the extensibility
+  // backbone, FD-18/FD-20/FD-02/FD-03/FD-15: custom_picklists +
+  // custom_picklist_options + custom_field_definitions +
+  // custom_field_values (typed one-column-family CHECK invariant, MONEY
+  // NUMERIC(19,4) per ADR-0009, INV-027 data-only guard) + saved_views
+  // (per-user/shared list views) + record_comments (append-only 🔒 thread;
+  // timeline composes audit_events client-side) + the three §3.16
+  // permission seeds (settings.custom_fields.manage /
+  // settings.picklists.manage / settings.views.share — the phase §4
+  // platform.views.manage projection landed as settings.views.share per
+  // the matrix §3.10 platform-plane rule) + the six platform.* feature-key
+  // plan grants (business + enterprise, tier-4 posture). The duplicate-
+  // invoice tolerance rides the code-side SETTINGS_REGISTRY key
+  // purchasing.duplicate_invoice_tolerance_pct (028/029 wave pattern).
+  "0049_custom_fields_productivity",
 ];
 
 /**

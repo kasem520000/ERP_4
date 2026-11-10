@@ -101,6 +101,39 @@ with gate-run evidence (1 INFRA-GATED / 5 CLOSED-LOCAL-TIER / 5 CLOSED — the h
 ledger). Entity catalog unchanged (156 tables; no migrations this phase — tuning
 only per §4).
 
+## Re-run — PHASE-036 (expansion W1: extensibility) · 2026-11-10
+
+Post-phase validation with the extensibility tree: **docs:validate 29/29 green**
+(the corpus gains the completion report
+[../implementation/phases/reports/PHASE-036-COMPLETION.md](../implementation/phases/reports/PHASE-036-COMPLETION.md)
++ the column-level TABLES spec
+[../database/TABLES/extensibility.md](../database/TABLES/extensibility.md); the
+recorded historical baselines above stay per DEF-009). The cross-document
+consistency facts re-verified at the phase:
+
+- The §3.16 permission family is drift-free: the matrix rows and the 0049 seed
+  agree bidirectionally — **matrix 248 keys = seed 248 keys**
+  (`check-permissions-drift` PASS; the parser is now statement-scoped so the
+  0049 VALUES indentation and the template seeds can never be misread).
+- FEATURE_CATALOG reads **182 feature keys (134 v1.1 + 38 v2.0 + 4 PHASE-035
+  intake + 6 PHASE-036 extensibility intake)**; the six platform.* rows carry
+  the tier-4 grant note; FEATURE_DEPS mirrors them (custom_picklists →
+  custom_fields edge included).
+- The golden effective-config pins were **re-pinned in-phase** (the
+  `purchasing.duplicate_invoice_tolerance_pct` SETTINGS wave moves every
+  tenant's §5 policy map): spec **44/44**; the old→new table lives in
+  `agent-ctx/P36-goldens-repin.md` (the §18 lesson-5 relay, now via the
+  checked-in `apps/api/scripts/compute-goldens.ts`).
+- INV-027 joins the invariant registry usage: the contracts forbidden-stem
+  test walks every posting/tax DTO schema + scans the engine sources — the
+  healthcare no-clinical gate pattern applied to the extensibility plane.
+- ENTITY_CATALOG §extensibility + TABLES/extensibility.md + DATA_DICTIONARY
+  §9 (the two new enums) + NAVIGATION_MODEL §9 (the two LIVE rows) +
+  IMPLEMENTATION_STATUS (the COMPLETE row + the cross-cutting refresh) +
+  CHANGELOG (newest-first) + CURRENT_STATE + NEXT_ACTION are synchronized;
+  i18n **ar=en=4,417** (+131); migrations journal **49 entries**; screens
+  **146**; the delivery carries both the archive and the GitHub push.
+
 ## Re-run — PHASE-035 (gap-closure) · 2026-11-10
 
 Post-phase validation with the gap-closure tree: **docs:validate 29/29 green** over

@@ -91,7 +91,12 @@ describe("migration manifest (MIGRATION_STRATEGY §1)", () => {
     // the §3 pending-intake set completed: the grant wave + the manifest
     // seed, configuration-only) + 0048_platform_overview (the platform
     // dashboard's SECURITY DEFINER aggregate — the 0021 definer precedent).
-    expect(files.at(-1)?.tag).toBe("0048_platform_overview");
+    // PHASE-036: 0049_custom_fields_productivity (the extensibility backbone
+    // — custom_picklists/options + custom_field_definitions/values with the
+    // typed one-family CHECK + saved_views + record_comments 🔒 + the three
+    // §3.16 permission seeds + the six platform.* plan grants; the
+    // duplicate-invoice tolerance rides the SETTINGS_REGISTRY key).
+    expect(files.at(-1)?.tag).toBe("0049_custom_fields_productivity");
   });
 
   it("journal entries mirror the manifest order (drizzle-kit manifest)", () => {

@@ -2844,6 +2844,92 @@ export const ROUTE_PERMISSIONS: readonly RoutePermissionRule[] = [
     path: "/api/v1/sync/admin/drafts/reassign",
     permission: "sync.devices.revoke",
   },
+  // PHASE-036: the definition/picklist management set (the §3.16 keys;
+  // the platform.custom_fields / platform.custom_picklists feature keys
+  // gate the same routes via @RequireFeature — both layers per BR-039).
+  {
+    method: "POST",
+    path: "/api/v1/settings/custom-fields",
+    permission: "settings.custom_fields.manage",
+  },
+  {
+    method: "PATCH",
+    path: "/api/v1/settings/custom-fields/:id",
+    permission: "settings.custom_fields.manage",
+  },
+  {
+    method: "DELETE",
+    path: "/api/v1/settings/custom-fields/:id",
+    permission: "settings.custom_fields.manage",
+  },
+  {
+    method: "POST",
+    path: "/api/v1/settings/picklists",
+    permission: "settings.picklists.manage",
+  },
+  {
+    method: "PATCH",
+    path: "/api/v1/settings/picklists/:id",
+    permission: "settings.picklists.manage",
+  },
+  {
+    method: "DELETE",
+    path: "/api/v1/settings/picklists/:id",
+    permission: "settings.picklists.manage",
+  },
+  {
+    method: "POST",
+    path: "/api/v1/settings/picklists/:id/options",
+    permission: "settings.picklists.manage",
+  },
+  {
+    method: "DELETE",
+    path: "/api/v1/settings/picklists/options/:id",
+    permission: "settings.picklists.manage",
+  },
+  // PHASE-036 T36-4 (FD-01): the bulk-action surfaces. The route permission
+  // is the entity's create-level key (the void/cancel-level surface); the
+  // approve/post keys are re-checked per ACTION in the controller (a
+  // stronger rule than the registry row can express — recorded §3.16).
+  {
+    method: "POST",
+    path: "/api/v1/sales/sales-invoices/bulk",
+    permission: "sales.invoices.create",
+  },
+  {
+    method: "POST",
+    path: "/api/v1/purchasing/supplier-invoices/bulk",
+    permission: "purchasing.supplier_invoices.create",
+  },
+  {
+    method: "POST",
+    path: "/api/v1/accounting/journal-entries/bulk",
+    permission: "accounting.journal_entries.create",
+  },
+  // PHASE-036 T36-5 (FD-04): the list-export surfaces (the entity's view
+  // key; the platform.list_export feature key gates via @RequireFeature).
+  {
+    method: "GET",
+    path: "/api/v1/sales/sales-invoices/export",
+    permission: "sales.invoices.view",
+  },
+  {
+    method: "GET",
+    path: "/api/v1/purchasing/supplier-invoices/export",
+    permission: "purchasing.supplier_invoices.view",
+  },
+  {
+    method: "GET",
+    path: "/api/v1/accounting/journal-entries/export",
+    permission: "accounting.journal_entries.view",
+  },
+  // PHASE-036 T36-6 (FD-08): copy-to-new on the sales document family
+  // (creates a fresh DRAFT — the draft-lifecycle rule; never a posted doc).
+  {
+    method: "POST",
+    path: "/api/v1/sales/sales-invoices/:id/copy-to-new",
+    permission: "sales.invoices.create",
+  },
 
 ];
 
@@ -2890,6 +2976,23 @@ export const SESSION_ROUTES: readonly { method: string; path: string }[] = [
   { method: "POST", path: "/api/v1/sync/push" },
   { method: "POST", path: "/api/v1/sync/pull/ack" },
   { method: "POST", path: "/api/v1/sync/push/ack" },
+  // PHASE-036: the extensibility plane (§3.16). The self-plane rows
+  // (definitions/values/picklist READS, personal saved views, comments +
+  // timeline) carry no key — every authenticated member renders forms and
+  // manages their own views (the notifications self-plane precedent; the
+  // shared-view publish flag additionally requires settings.views.share,
+  // checked route-side AND service-side).
+  { method: "GET", path: "/api/v1/settings/custom-fields" },
+  { method: "GET", path: "/api/v1/settings/custom-fields/values" },
+  { method: "PUT", path: "/api/v1/settings/custom-fields/values" },
+  { method: "GET", path: "/api/v1/settings/picklists" },
+  { method: "GET", path: "/api/v1/settings/views" },
+  { method: "POST", path: "/api/v1/settings/views" },
+  { method: "PATCH", path: "/api/v1/settings/views/:id" },
+  { method: "DELETE", path: "/api/v1/settings/views/:id" },
+  { method: "GET", path: "/api/v1/extensibility/timeline" },
+  { method: "GET", path: "/api/v1/extensibility/comments" },
+  { method: "POST", path: "/api/v1/extensibility/comments" },
 ];
 
 /**

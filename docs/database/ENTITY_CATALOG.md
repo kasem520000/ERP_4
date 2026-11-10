@@ -382,6 +382,17 @@ truth: [TABLES/notes-installments.md](TABLES/notes-installments.md).
 | `elimination_entries` | Intercompany eliminations | group_id, fiscal_period_id, description, status DRAFT/POSTED, journal_entry_ids | 034 | no |
 | `consolidation_runs` | Consolidation execution records | group_id, fiscal_period_id, status QUEUED/RUNNING/COMPLETED/FAILED, output refs | 034 | no |
 
+## extensibility (PHASE-036 — the post-roadmap gap-closure program's first module)
+
+| Entity | Purpose | Key fields | Phase | OC |
+|--------|---------|-----------|-------|----|
+| `custom_picklists` | Tenant-owned bilingual option sets (FD-20) — consumed by SELECT-type custom-field definitions; is_active hides without delete (historical values keep resolving) | tenant_id, key (uq per tenant), name, name_ar, is_active | 036 | no |
+| `custom_picklist_options` | The option rows — stable value codes + bilingual labels + sort; ON DELETE CASCADE confined to the owning picklist | tenant_id, picklist_id (composite FK), value (uq per picklist), label, label_ar, sort, is_active | 036 | no |
+| `custom_field_definitions` | Tenant-defined fields over the closed 11-entity-kind list (FD-18) — six value families, SELECT bound to a picklist (ck shape), bilingual labels/help, validation jsonb {regex?,min?,max?,minDate?,maxDate?}, show_in_list caps the list fold-in | tenant_id, entity_kind, key (uq per tenant+entity), label, label_ar, type CHECK 6 families, picklist_id?, required, default_value jsonb, validation jsonb, help_text?, help_text_ar?, show_in_list, sort, is_active | 036 | no |
+| `custom_field_values` | Typed value store — one row per (entity, definition) WITH a value (no row = empty); field_type snapshot + the ck one-family invariant (exactly one value column populated, matching the family); MONEY numeric(19,4) per ADR-0009; INV-027: never posting surfaces | tenant_id, entity_kind, entity_id, definition_id (uq composite), field_type, value_text?/value_number(28,10)?/value_money(19,4)?/value_date?/value_boolean?/value_picklist_option_id? | 036 | no |
+| `saved_views` | Per-user or shared list views (FD-02/FD-03) — columns/filters/sort jsonb snapshots + the default flag; the COALESCE unique index keeps shared (user_id NULL) + personal name spaces collision-free | tenant_id, user_id?, entity_kind, name, columns jsonb, filters jsonb, sort jsonb?, is_default | 036 | no |
+| `record_comments` 🔒 | The per-record collaboration thread (FD-15) — append-only (guard trigger; DELETE only under erp.purge_mode); mentions = parsed @uuid tokens, data-only until PHASE-052's delivery fabric | tenant_id, author_id, entity_kind, entity_id, body (1–4,000), mentions jsonb? | 036 | no |
+
 ## Diagrams
 
 ER diagrams per domain cluster: [ERD/](ERD/) — tenancy-identity, accounting-core,

@@ -35,7 +35,8 @@ import { fetchApi, getSessionToken } from "../../../../lib/server-api";
  *  the PHASE-035 screen census — sources named on the page itself). */
 const MODULE_COUNT = 22;
 const JURISDICTION_COUNT = 10;
-const SCREEN_COUNT = 145;
+// PHASE-036: the custom-fields manager is the 146th screen.
+const SCREEN_COUNT = 146;
 const OFFLINE_SYNC = "✓";
 
 const FEATURE_TILES: ReadonlyArray<{

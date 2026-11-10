@@ -1,11 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Post, Query, Req } from "@nestjs/common";
-import type { Request } from "express";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Post, Query, Req, Res } from "@nestjs/common";
+import type { Request, Response } from "express";
 import { z } from "zod";
 
+import { bulkActionRequestSchema } from "@erp/contracts";
+
 import { identityOf, type SessionContext } from "../../../infra/context/session-context";
-import { UnauthenticatedError } from "../../identity/api/identity";
+import { UnauthenticatedError, ForbiddenError } from "../../identity/api/identity";
 import { RequirePermissions } from "../../../infra/auth/require-permissions.decorator";
+import { RequireFeature } from "../../../infra/auth/require-feature.decorator";
 import { envelope } from "../../../infra/http/envelope";
+import { executeBulk } from "../../extensibility/application/bulk-actions";
+import { cell, toCsv, toXlsx, type ExportColumn } from "../../extensibility/application/list-export";
 import { QuotationService } from "../application/quotations";
 import { SalesOrderService } from "../application/orders";
 import { DeliveryNoteService } from "../application/deliveries";
@@ -622,6 +627,161 @@ export class SalesController {
     const identity = requireIdentity(request);
     const { reason } = reasonSchema.parse(body);
     return envelope(this.invoices.cancel(id, reason, identity.userId));
+  }
+
+  // -- PHASE-036 productivity surfaces (bulk / export / copy-to-new) ------------------
+
+  /**
+   * PHASE-036 T36-4 (FD-01): bulk approve/post/void over the EXISTING
+   * lifecycle service — the per-row report envelope is the contract
+   * (partial failure reported, never silent; re-runs idempotent per row).
+   * The route permission is sales.invoices.create (the void-level key);
+   * approve/post re-check their own keys per ACTION (a stronger rule than
+   * the registry row — matrix §3.16 note).
+   */
+  @Post("sales-invoices/bulk")
+  @RequirePermissions("sales.invoices.create")
+  @RequireFeature("platform.bulk_actions")
+  async bulkInvoices(@Req() request: Request, @Body() body: unknown) {
+    const identity = requireIdentity(request);
+    const input = bulkActionRequestSchema.parse(body);
+    const actionPermissions: Record<string, string> = {
+      approve: "sales.invoices.approve",
+      post: "sales.invoices.post",
+      void: "sales.invoices.create",
+    };
+    const required = actionPermissions[input.action];
+    if (required === undefined || identity.permissions?.has(required) !== true) {
+      throw new ForbiddenError(required ?? `sales.invoices.${input.action}`);
+    }
+    return envelope(
+      await executeBulk(input.action, input.ids, ({ id }) => {
+        if (input.action === "approve") {
+          // Bulk approve never carries the credit-check override — the
+          // override stays single-row, audited, by design.
+          return this.invoices.approve(id, identity.userId, false);
+        }
+        if (input.action === "post") {
+          return this.invoices.post(id, identity.userId);
+        }
+        return this.invoices.cancel(id, "BULK_VOID", identity.userId);
+      }),
+    );
+  }
+
+  /**
+   * PHASE-036 T36-5 (FD-04): the sales-invoice list export (csv/xlsx,
+   * server-side, honoring the current filters + visible columns — never a
+   * client-side grid dump). E-04: the export itself is audited.
+   */
+  @Get("sales-invoices/export")
+  @RequirePermissions("sales.invoices.view")
+  @RequireFeature("platform.list_export")
+  async exportInvoices(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Query("status") status?: string,
+    @Query("customerId") customerId?: string,
+    @Query("kind") kind?: string,
+    @Query("format") format?: string,
+    @Query("columns") columns?: string,
+  ) {
+    requireIdentity(request);
+    const rows = await this.invoices.list({ status, customerId, kind, limit: 2000 });
+    const allColumns: ExportColumn[] = [
+      { key: "invoiceNo", header: "Invoice No" },
+      { key: "invoiceDate", header: "Date" },
+      { key: "dueDate", header: "Due" },
+      { key: "customerId", header: "Customer" },
+      { key: "kind", header: "Kind" },
+      { key: "currencyCode", header: "Currency" },
+      { key: "totalNet", header: "Net" },
+      { key: "totalTax", header: "Tax" },
+      { key: "totalGross", header: "Gross" },
+      { key: "status", header: "Status" },
+    ];
+    const selected = (columns ?? "")
+      .split(",")
+      .map((column) => column.trim())
+      .filter((column) => column.length > 0);
+    const exportColumns = selected.length > 0
+      ? allColumns.filter((column) => selected.includes(column.key))
+      : allColumns;
+    const sheet = {
+      name: "sales-invoices",
+      columns: exportColumns,
+      rows: rows.map((row) => ({
+        invoiceNo: cell(row.invoiceNo),
+        invoiceDate: cell(row.invoiceDate),
+        dueDate: cell(row.dueDate),
+        customerId: cell(row.customerId),
+        kind: cell(row.kind),
+        currencyCode: cell(row.currencyCode),
+        totalNet: cell(row.totalNet),
+        totalTax: cell(row.totalTax),
+        totalGross: cell(row.totalGross),
+        status: cell(row.status),
+      })),
+    };
+    const stamp = new Date().toISOString().slice(0, 10);
+    if (format === "xlsx") {
+      const buffer = await toXlsx([sheet]);
+      response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      response.header("Content-Disposition", `attachment; filename="sales-invoices-${stamp}.xlsx"`);
+      response.status(200).send(buffer);
+    } else {
+      response.header("Content-Type", "text/csv; charset=utf-8");
+      response.header("Content-Disposition", `attachment; filename="sales-invoices-${stamp}.csv"`);
+      response.status(200).send(toCsv(sheet));
+    }
+  }
+
+  /**
+   * PHASE-036 T36-6 (FD-08): copy-to-new — the invoice's header + lines
+   * copied as a fresh DRAFT (never a posted doc; the draft-lifecycle rule).
+   * The copy re-prices nothing: lines carry their stored prices; the new
+   * document enters the ordinary DRAFT → submit → approve → post chain.
+   */
+  @Post("sales-invoices/:id/copy-to-new")
+  @HttpCode(HttpStatus.CREATED)
+  @RequirePermissions("sales.invoices.create")
+  async copyInvoiceToNew(@Req() request: Request, @Param("id") id: string) {
+    const identity = requireIdentity(request);
+    const source = await this.invoices.findWithLines(id);
+    const created = await this.invoices.create({
+      branchId: source.branchId,
+      customerId: source.customerId,
+      salesRepId: source.salesRepId,
+      kind: source.kind === "CASH" ? "CASH" : "CREDIT",
+      invoiceDate: new Date().toISOString().slice(0, 10),
+      dueDate: source.dueDate,
+      currencyCode: source.currencyCode,
+      exchangeRate: source.exchangeRate,
+      // The copy NEVER inherits the delivery/order linkage — a copied
+      // document references fresh business state or none (recorded §2).
+      orderId: null,
+      deliveryId: null,
+      warehouseId: source.warehouseId,
+      cashAccountId: source.cashAccountId,
+      note: source.note,
+      noteAr: source.noteAr,
+      actorId: identity.userId,
+      lines: source.lines.map((line) => ({
+        itemId: line.itemId,
+        accountId: line.accountId,
+        deliveryLineId: null,
+        description: line.description,
+        descriptionAr: line.descriptionAr,
+        qty: line.qty,
+        unitPrice: line.unitPrice,
+        discountAmount: line.discountAmount,
+        taxCodeId: line.taxCodeId,
+        batchId: line.batchId,
+        serialIds: null,
+        note: line.note,
+      })),
+    });
+    return envelope(created);
   }
 
   // -- credit notes (BR-004; G-04/W-3) ------------------------------------------------

@@ -158,10 +158,19 @@ export class MatchRequiresLinesError extends DomainError {
 // -- supplier invoices (BR-011 duplicates, G-08 posting) ---------------------------
 
 export class DuplicateSupplierInvoiceError extends DomainError {
-  constructor(details: { supplierId: string; invoiceNo: string; amount: string; existingId: string }) {
+  /** PHASE-036 (AD-36-10): `warnings` rides the details — the full match list
+   *  for the UI dialog (kind/invoice no/amount/currency/date/status per row). */
+  constructor(details: {
+    supplierId: string;
+    invoiceNo: string;
+    amount: string;
+    existingId: string;
+    warnings?: ReadonlyArray<Record<string, unknown>>;
+  }) {
     super(
       "DUPLICATE_SUPPLIER_INVOICE",
-      `supplier invoice (${details.invoiceNo}, ${details.amount}) already exists for this supplier (document ${details.existingId}) — BR-011 blocks the duplicate entry`,
+      `supplier invoice (${details.invoiceNo}, ${details.amount}) already exists for this supplier (document ${details.existingId}) — BR-011 blocks the duplicate entry; proceed-anyway (audited) re-submit available`,
+      details,
     );
   }
 }
